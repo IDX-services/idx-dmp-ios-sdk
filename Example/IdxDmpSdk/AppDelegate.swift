@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  IdxDmpSdk
 //
-//  Created by Dmitry Kulikov on 12/14/2022.
-//  Copyright (c) 2022 Dmitry Kulikov. All rights reserved.
+//  Created by Brainway LTD on 12/14/2022.
+//  Copyright (c) 2022 Brainway LTD. All rights reserved.
 //
 
 import UIKit

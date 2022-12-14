@@ -1,5 +1,5 @@
 PODS:
-  - IdxDmpSdk (0.1.0)
+  - IdxDmpSdk (0.0.1)
 
 DEPENDENCIES:
   - IdxDmpSdk (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  IdxDmpSdk: f0864b5bfbc625d2e620bb7439979bae7d54ff61
+  IdxDmpSdk: 6fb242b673afc677bcca90580114d5220e846fad
 
 PODFILE CHECKSUM: a956fb8a399eba2bc86e5d86158c065134c525b0
 

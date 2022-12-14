@@ -24,7 +24,7 @@ TODO: Add long description of the pod here.
   s.homepage         = 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Brainway' => 'dmitry@brainway.co.il' }
+  s.author           = { 'Brainway LTD' => 'brainway.co.il' }
   s.source           = { :git => 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
