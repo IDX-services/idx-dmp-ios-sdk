@@ -1,0 +1,22 @@
+{
+  "name": "IdxDmpSdk",
+  "version": "0.1.0",
+  "summary": "A short description of IdxDmpSdk.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/Dmitry Kulikov/IdxDmpSdk",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Dmitry Kulikov": "dmitry@brainway.co.il"
+  },
+  "source": {
+    "git": "https://github.com/Dmitry Kulikov/IdxDmpSdk.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "10.0"
+  },
+  "source_files": "IdxDmpSdk/Classes/**/*"
+}

@@ -1,0 +1,6 @@
+framework module IdxDmpSdk {
+  umbrella header "IdxDmpSdk-umbrella.h"
+
+  export *
+  module * { export * }
+}

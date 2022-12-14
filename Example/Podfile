@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '10.0'
+
+target 'IdxDmpSdk_Example' do
+  pod 'IdxDmpSdk', :path => '../'
+
+  target 'IdxDmpSdk_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
