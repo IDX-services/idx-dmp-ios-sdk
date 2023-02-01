@@ -4,6 +4,7 @@ platform :ios, '10.0'
 
 target 'IdxDmpSdk_Example' do
   pod 'IdxDmpSdk', :path => '../'
+  pod 'RealmSwift', '10.33.0'
 
   target 'IdxDmpSdk_Tests' do
     inherit! :search_paths

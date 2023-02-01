@@ -1,16 +1,30 @@
 PODS:
-  - IdxDmpSdk (0.0.1)
+  - IdxDmpSdk (0.0.1):
+    - RealmSwift (= 10.33.0)
+  - Realm (10.33.0):
+    - Realm/Headers (= 10.33.0)
+  - Realm/Headers (10.33.0)
+  - RealmSwift (10.33.0):
+    - Realm (= 10.33.0)
 
 DEPENDENCIES:
   - IdxDmpSdk (from `../`)
+  - RealmSwift (= 10.33.0)
+
+SPEC REPOS:
+  trunk:
+    - Realm
+    - RealmSwift
 
 EXTERNAL SOURCES:
   IdxDmpSdk:
     :path: "../"
 
 SPEC CHECKSUMS:
-  IdxDmpSdk: 6fb242b673afc677bcca90580114d5220e846fad
+  IdxDmpSdk: 4ff6c4829294773d10287613a56d25c8f9170dc2
+  Realm: d4f810e161fa2c2c589b9860b6eb09238deacd73
+  RealmSwift: cef9946f09f2333a8f2ac8bac4f8de52fb9f5ac3
 
-PODFILE CHECKSUM: a956fb8a399eba2bc86e5d86158c065134c525b0
+PODFILE CHECKSUM: 1ebf826bc3049a92921ece08e25222880a203611
 
 COCOAPODS: 1.11.3
