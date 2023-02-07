@@ -83,7 +83,7 @@ func matchDefinitions(events: [Event], definitions: [Definition]) -> [String] {
         }
         
         if (definition.behaviourOperators.count < definition.behaviours.count - 1) {
-            // TODO throw exception
+            // TODO send fail message to BE
             return false
         }
         

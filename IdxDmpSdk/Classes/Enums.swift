@@ -39,3 +39,16 @@ enum EBehaviourType: String, Decodable, PersistableEnum {
 enum EDatabaseAction: String, Decodable {
     case UPDATE, REPLACE
 }
+
+enum EDMPError: Error {
+    case cannotCreateUrl(from: String)
+    case urlIsNil
+    case responseIsEmpty
+    case setEventsFailed
+    case mergeEventsFailed
+    case setDefinitionsFailed
+    case databaseConnectFailed
+    case userIdIsEmpty
+    case userDataIsEmpty
+    case userDataParseError
+}

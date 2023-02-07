@@ -78,17 +78,17 @@ class Event: Object {
 }
 
 final class Storage {
-    private var database: Realm!
+    private var database: Realm
     
-    public init() {
+    public init() throws {
         do {
             database = try Realm()
         } catch {
-            print("Open realm connect has failed")
+            throw EDMPError.databaseConnectFailed
         }
     }
     
-    public func setDefinitions(definitions: [DefinitionStruct]) {
+    public func setDefinitions(definitions: [DefinitionStruct]) throws {
         do {
             try self.database.write() {
                 definitions.forEach { definition in
@@ -97,7 +97,7 @@ final class Storage {
                 }
             }
         } catch {
-            print("setDefinitions has failed")
+            throw EDMPError.setDefinitionsFailed
         }
     }
     
@@ -105,7 +105,7 @@ final class Storage {
         return self.database.objects(Definition.self)
     }
     
-    public func setEvents(events: [EventStruct]) {
+    public func setEvents(events: [EventStruct]) throws {
         do {
             try self.database.write() {
                 events.forEach { event in
@@ -114,7 +114,7 @@ final class Storage {
                 }
             }
         } catch {
-            print("setEvents has failed")
+            throw EDMPError.setEventsFailed
         }
     }
     
@@ -122,7 +122,7 @@ final class Storage {
         return self.database.objects(Event.self)
     }
     
-    public func mergeEvents(newEvents: [EventStruct]) {
+    public func mergeEvents(newEvents: [EventStruct]) throws {
         let oldEvents = self.getEvents()
         
         do {
@@ -137,7 +137,7 @@ final class Storage {
                         currentOldEvent.timestamps.sort { a, b in
                             return b > a
                         }
-                        let removeCount = currentOldEvent.timestamps.count - 50
+                        let removeCount = currentOldEvent.timestamps.count - Config.Constant.maxEventCount
                         if (removeCount > 0) {
                             currentOldEvent.timestamps.removeFirst(removeCount)
                         }
@@ -148,7 +148,7 @@ final class Storage {
                 }
             }
         } catch {
-            print("mergeEvents has failed")
+            throw EDMPError.mergeEventsFailed
         }
     }
 }

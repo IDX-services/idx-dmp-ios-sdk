@@ -1,16 +1,23 @@
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
-    let databaseStorage: Storage
+    let logger: Logger = Logger()
+    let databaseStorage: Storage?
 
     var definitionIds: [String] = []
     
     public init(providerId: String) {
         self.providerId = providerId
-        databaseStorage = Storage()
+        
+        do {
+            databaseStorage = try Storage()
+        } catch {
+            databaseStorage = nil
+            self.logger.error(EDMPError.databaseConnectFailed)
+        }
     }
     
-    func setUserId(userId: String) {
+    private func setUserId(userId: String) {
         localStorage.set(userId, forKey: "userId")
     }
     
@@ -18,7 +25,7 @@ public final class DataManagerProvider {
         return localStorage.string(forKey: "userId")
     }
     
-    func setTimestamp(ts: String) {
+    private func setTimestamp(ts: String) {
         localStorage.set(ts, forKey: "ts")
     }
     
@@ -30,19 +37,47 @@ public final class DataManagerProvider {
         return providerId
     }
     
-    func parseUserState(data: Data) -> UserStateStruct? {
+    private func updateUserState(data: Data?) {
         let decoder = JSONDecoder()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = Config.Date.format
         
         decoder.dateDecodingStrategy = .formatted(dateFormatter)
         
-        guard let userState: UserStateStruct = try? decoder.decode(UserStateStruct.self, from: data) else {
-            print("Parse user state response error")
-            return nil
+        guard let userData = data else {
+            logger.error(EDMPError.userDataIsEmpty)
+            return
         }
         
-        return userState
+        guard let userState: UserStateStruct = try? decoder.decode(UserStateStruct.self, from: userData) else {
+            logger.error(EDMPError.userDataParseError)
+            return
+        }
+        
+        self.setUserId(userId: userState.userId)
+        self.setTimestamp(ts: String(userState.lastModifiedTimestamp))
+        
+        guard let databaseConnection = self.databaseStorage else {
+            logger.error(EDMPError.databaseConnectFailed)
+            return
+        }
+        
+        do {
+            try databaseConnection.setDefinitions(definitions: userState.definitions)
+            try databaseConnection.mergeEvents(newEvents: userState.events)
+        } catch {
+            logger.error(error)
+        }
+    }
+    
+    private func calculateAudiences() {
+        guard let events = self.databaseStorage?.getEvents(),
+              let definitions = self.databaseStorage?.getDefinitions() else {
+            logger.error(EDMPError.databaseConnectFailed)
+            return
+        }
+        
+        self.definitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
     }
     
     public func getDefinitionIds() -> String {
@@ -50,25 +85,22 @@ public final class DataManagerProvider {
     }
     
     public func getState(completionHandler: @escaping () -> Void = {}) {
-        Api.get(
-            url: Config.Api.stateUrl,
-            queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
-        ) {(data, error) in
-            if let userState = self.parseUserState(data: data) {
-                self.setUserId(userId: userState.userId)
-                self.setTimestamp(ts: String(userState.lastModifiedTimestamp))
-                
-                self.databaseStorage.setDefinitions(definitions: userState.definitions)
-                self.databaseStorage.mergeEvents(newEvents: userState.events)
+        do {
+            try Api.get(
+                url: Config.Api.stateUrl,
+                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
+            ) {(data, error) in
+                self.updateUserState(data: data)
+                completionHandler()
             }
-            
-            completionHandler()
+        } catch {
+            logger.error(error)
         }
     }
     
     public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping () -> Void = {}) {
         guard let userId = getUserId() else {
-            return print("userId is not found")
+            return logger.error(EDMPError.userIdIsEmpty)
         }
 
         let eventBody = EventRequestStruct(
@@ -77,26 +109,19 @@ public final class DataManagerProvider {
             providerId: self.providerId,
             properties: properties
         )
-
-        Api.post(
-            url: Config.Api.eventUrl,
-            queryItems: ["ts": getTimestamp(), "dmpid": userId],
-            body: eventBody
-        ) {(data, error) in
-            if let userState = self.parseUserState(data: data) {
-                self.setUserId(userId: userState.userId)
-                self.setTimestamp(ts: String(userState.lastModifiedTimestamp))
-
-                self.databaseStorage.setDefinitions(definitions: userState.definitions)
-                self.databaseStorage.mergeEvents(newEvents: userState.events)
+        
+        do {
+            try Api.post(
+                url: Config.Api.eventUrl,
+                queryItems: ["ts": getTimestamp(), "dmpid": userId],
+                body: eventBody
+            ) {(data, error) in
+                self.updateUserState(data: data)
+                self.calculateAudiences()
+                completionHandler()
             }
-            
-            let events = self.databaseStorage.getEvents()
-            let definitions = self.databaseStorage.getDefinitions()
-
-            self.definitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
-            
-            completionHandler()
+        } catch {
+            logger.error(error)
         }
     }
 }
