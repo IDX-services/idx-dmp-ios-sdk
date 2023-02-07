@@ -1,16 +1,19 @@
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
-    let logger: Logger = Logger()
+    let logger = Logger()
     let databaseStorage: Storage?
 
+    var initIsComplete = false
+    var eventRequestQueue: [EventQueueItem] = []
     var definitionIds: [String] = []
     
-    public init(providerId: String) {
+    public init(providerId: String, completionHandler: @escaping () -> Void = {}) {
         self.providerId = providerId
         
         do {
             databaseStorage = try Storage()
+            self.getState(completionHandler: completionHandler)
         } catch {
             databaseStorage = nil
             self.logger.error(EDMPError.databaseConnectFailed)
@@ -84,13 +87,24 @@ public final class DataManagerProvider {
         return definitionIds.joined(separator: ",")
     }
     
-    public func getState(completionHandler: @escaping () -> Void = {}) {
+    private func getState(completionHandler: @escaping () -> Void = {}) {
         do {
             try Api.get(
                 url: Config.Api.stateUrl,
                 queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
             ) {(data, error) in
                 self.updateUserState(data: data)
+                
+                if (!self.initIsComplete) {
+                    self.initIsComplete = true
+                    self.eventRequestQueue.forEach { eventQueueItem in
+                        self.sendEvent(
+                            properties: eventQueueItem.properties,
+                            completionHandler: eventQueueItem.callback
+                        )
+                    }
+                }
+                
                 completionHandler()
             }
         } catch {
@@ -99,6 +113,11 @@ public final class DataManagerProvider {
     }
     
     public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping () -> Void = {}) {
+        if (!self.initIsComplete) {
+            self.eventRequestQueue.append(EventQueueItem(properties: properties, callback: completionHandler))
+            return
+        }
+
         guard let userId = getUserId() else {
             return logger.error(EDMPError.userIdIsEmpty)
         }

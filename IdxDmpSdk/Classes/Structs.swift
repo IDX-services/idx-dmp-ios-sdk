@@ -73,3 +73,8 @@ public struct EventRequestStruct: Encodable {
     let providerId: String
     let properties: EventRequestPropertiesStruct
 }
+
+struct EventQueueItem {
+    let properties: EventRequestPropertiesStruct
+    let callback: () -> Void
+}
