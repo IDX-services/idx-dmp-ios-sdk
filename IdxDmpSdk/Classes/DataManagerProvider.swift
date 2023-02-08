@@ -66,6 +66,9 @@ public final class DataManagerProvider {
         }
         
         do {
+            if (userState.action == .REPLACE) {
+                try databaseConnection.removeStorageData()
+            }
             try databaseConnection.setDefinitions(definitions: userState.definitions)
             try databaseConnection.mergeEvents(newEvents: userState.events)
         } catch {

@@ -41,6 +41,12 @@ final class Logger {
             self.printMessage("Merge events failed")
         case EDMPError.setDefinitionsFailed:
             self.printMessage("Set definitions failed")
+        case EDMPError.removeAllEvents:
+            self.printMessage("Remove all events failed")
+        case EDMPError.removeAllDefinitions:
+            self.printMessage("Remove all definitions failed")
+        case EDMPError.removeAllStorage:
+            self.printMessage("Remove all storage failed")
         case EDMPError.databaseConnectFailed:
             self.printMessage("Database is not available")
         case EDMPError.userIdIsEmpty:

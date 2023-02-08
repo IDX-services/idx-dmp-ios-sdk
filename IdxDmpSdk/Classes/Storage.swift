@@ -82,7 +82,8 @@ final class Storage {
     
     public init() throws {
         do {
-            database = try Realm()
+            let configuration = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
+            database = try Realm(configuration: configuration)
         } catch {
             throw EDMPError.databaseConnectFailed
         }
@@ -105,6 +106,16 @@ final class Storage {
         return self.database.objects(Definition.self)
     }
     
+    public func removeAllDefinitions() throws {
+        do {
+            try self.database.write() {
+                self.database.delete(self.getDefinitions())
+            }
+        } catch {
+            throw EDMPError.removeAllDefinitions
+        }
+    }
+    
     public func setEvents(events: [EventStruct]) throws {
         do {
             try self.database.write() {
@@ -120,6 +131,16 @@ final class Storage {
     
     public func getEvents() -> Results<Event> {
         return self.database.objects(Event.self)
+    }
+    
+    public func removeAllEvents() throws {
+        do {
+            try self.database.write() {
+                self.database.delete(self.getEvents())
+            }
+        } catch {
+            throw EDMPError.removeAllEvents
+        }
     }
     
     public func mergeEvents(newEvents: [EventStruct]) throws {
@@ -149,6 +170,16 @@ final class Storage {
             }
         } catch {
             throw EDMPError.mergeEventsFailed
+        }
+    }
+    
+    public func removeStorageData() throws {
+        do {
+            try self.database.write() {
+                self.database.deleteAll()
+            }
+        } catch {
+            throw EDMPError.removeAllStorage
         }
     }
 }

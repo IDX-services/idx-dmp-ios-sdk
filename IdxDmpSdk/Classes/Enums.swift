@@ -47,6 +47,9 @@ enum EDMPError: Error {
     case setEventsFailed
     case mergeEventsFailed
     case setDefinitionsFailed
+    case removeAllEvents
+    case removeAllDefinitions
+    case removeAllStorage
     case databaseConnectFailed
     case userIdIsEmpty
     case userDataIsEmpty
