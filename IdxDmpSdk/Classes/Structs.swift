@@ -40,13 +40,13 @@ struct UserStateStruct: Decodable {
 }
 
 public struct EventRequestPropertiesStruct: Encodable {
-    let url: String
-    let title: String
-    let domain: String
-    let author: String
-    let category: String
-    let description: String
-    let tags: [String]
+    public let url: String
+    public let title: String
+    public let domain: String
+    public let author: String
+    public let category: String
+    public let description: String
+    public let tags: [String]
 
     public init(
         url: String,

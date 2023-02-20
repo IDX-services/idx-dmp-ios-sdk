@@ -24,7 +24,7 @@ public final class DataManagerProvider {
         localStorage.set(userId, forKey: "userId")
     }
     
-    func getUserId() -> String? {
+    public func getUserId() -> String? {
         return localStorage.string(forKey: "userId")
     }
     
@@ -32,11 +32,11 @@ public final class DataManagerProvider {
         localStorage.set(ts, forKey: "ts")
     }
     
-    func getTimestamp() -> String? {
+    public func getTimestamp() -> String? {
         return localStorage.string(forKey: "ts")
     }
     
-    func getProviderId() -> String {
+    public func getProviderId() -> String {
         return providerId
     }
     
