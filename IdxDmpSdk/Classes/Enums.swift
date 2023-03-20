@@ -54,4 +54,5 @@ enum EDMPError: Error {
     case userIdIsEmpty
     case userDataIsEmpty
     case userDataParseError
+    case requestError
 }

@@ -45,7 +45,7 @@ class ViewController: UIViewController {
             return
         }
 
-        self.dmp = DataManagerProvider(providerId: providerId) {
+        self.dmp = DataManagerProvider(providerId: providerId) {_ in
 //            self.showToast("Provider id has been init")
         }
         
@@ -59,9 +59,13 @@ class ViewController: UIViewController {
             tags: textFieldTags.text?.components(separatedBy: ",") ?? []
         )
 
-        self.dmp!.sendEvent(properties: requestProps) {
+        self.dmp!.sendEvent(properties: requestProps) { error in
+            if (error != nil) {
+                self.dmp!.resetState()
+            }
+
             self.labelDebugOutput.text = """
-                Success PAGE VIEW with params:
+                \(error == nil ? "Success PAGE VIEW with params:" : "Failed request with params:")
                 URL: \(requestProps.url)
                 Title: \(requestProps.title)
                 Domain: \(requestProps.domain)

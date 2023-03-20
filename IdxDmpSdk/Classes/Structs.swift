@@ -76,5 +76,5 @@ public struct EventRequestStruct: Encodable {
 
 struct EventQueueItem {
     let properties: EventRequestPropertiesStruct
-    let callback: () -> Void
+    let callback: (Any?) -> Void
 }

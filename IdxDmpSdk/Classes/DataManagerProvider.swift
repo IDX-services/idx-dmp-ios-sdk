@@ -8,7 +8,7 @@ public final class DataManagerProvider {
     var eventRequestQueue: [EventQueueItem] = []
     var definitionIds: [String] = []
     
-    public init(providerId: String, completionHandler: @escaping () -> Void = {}) {
+    public init(providerId: String, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         self.providerId = providerId
         
         do {
@@ -90,7 +90,7 @@ public final class DataManagerProvider {
         return definitionIds.joined(separator: ",")
     }
     
-    private func getState(completionHandler: @escaping () -> Void = {}) {
+    private func getState(completionHandler: @escaping (Any?) -> Void = {_ in }) {
         do {
             try Api.get(
                 url: Config.Api.stateUrl,
@@ -107,15 +107,16 @@ public final class DataManagerProvider {
                         )
                     }
                 }
-                
-                completionHandler()
+
+                completionHandler(error)
             }
         } catch {
+            completionHandler(error)
             logger.error(error)
         }
     }
     
-    public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping () -> Void = {}) {
+    public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         if (!self.initIsComplete) {
             self.eventRequestQueue.append(EventQueueItem(properties: properties, callback: completionHandler))
             return
@@ -140,8 +141,20 @@ public final class DataManagerProvider {
             ) {(data, error) in
                 self.updateUserState(data: data)
                 self.calculateAudiences()
-                completionHandler()
+                completionHandler(error)
             }
+        } catch {
+            completionHandler(error)
+            logger.error(error)
+        }
+    }
+    
+    public func resetState () -> Void {
+        do {
+            localStorage.removeObject(forKey: "userId")
+            localStorage.removeObject(forKey: "ts")
+            self.definitionIds = []
+            try self.databaseStorage?.removeStorageData()
         } catch {
             logger.error(error)
         }

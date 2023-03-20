@@ -34,11 +34,19 @@ final class Api {
         completionHandler: @escaping (Data?, Error?) -> Void
     ) {
         URLSession.shared.dataTask(with: request) {(data, response, error) in
-            guard let data = data else {
-                return completionHandler(nil, EDMPError.responseIsEmpty)
-            }
-            
             DispatchQueue.main.async {
+                guard let data = data else {
+                    return completionHandler(nil, EDMPError.responseIsEmpty)
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    return completionHandler(nil, EDMPError.responseIsEmpty)
+                }
+
+                if (httpResponse.statusCode != 200) {
+                    return completionHandler(nil, EDMPError.requestError)
+                }
+
                 completionHandler(data, error)
             }
         }.resume()

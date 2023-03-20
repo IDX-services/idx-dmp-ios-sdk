@@ -73,7 +73,7 @@ func matchFrequency(behaviour: Behaviour, eventTimestamps: [Int]) -> Bool {
 }
 
 func matchDefinitions(events: [Event], definitions: [Definition]) -> [String] {
-    return definitions.filter { definition in
+    let definitonIds = definitions.filter { definition in
         let eventsByDefinition = events.filter { event in
             return event.defId == definition.defId
         }
@@ -120,4 +120,6 @@ func matchDefinitions(events: [Event], definitions: [Definition]) -> [String] {
 
         return isMatch
     }.map({ return $0.code })
+    
+    return Array(Set(definitonIds))
 }
