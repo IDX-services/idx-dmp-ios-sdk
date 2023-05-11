@@ -19,6 +19,38 @@ it, simply add the following line to your Podfile:
 pod 'IdxDmpSdk'
 ```
 
+## Integration example
+
+```
+class ViewController: UIViewController {
+    var dmp: DataManagerProvider?
+    
+    ...
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        self.dmp = DataManagerProvider(providerId: providerId) {_ in
+          // Success callback
+        }
+    }
+
+    ...
+    
+    @IBAction func handleShowAd() {
+        guard let dmp = self.dmp else {
+            return
+        }
+
+        let adRequest: GAMRequest = GAMRequest()
+
+        adRequest.customTargeting = ["dxseg": dmp.getDefinitionIds()]
+    }
+
+    ...
+}
+```
+
 ## Author
 
 Brainway LTD, https://brainway.co.il/
