@@ -21,7 +21,7 @@ pod 'IdxDmpSdk'
 
 ## Integration example
 
-```
+```swift
 class ViewController: UIViewController {
     var dmp: DataManagerProvider?
     
