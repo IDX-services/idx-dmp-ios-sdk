@@ -13,7 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/realm/realm-swift.git", exact: "10.33.0"),
-        .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads.git", exact: "10.5.0"),
+        .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads.git", from: "9.9.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
