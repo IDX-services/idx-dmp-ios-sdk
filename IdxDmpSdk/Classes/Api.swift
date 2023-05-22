@@ -1,3 +1,5 @@
+import Foundation
+
 final class Api {
     private static func makeRequest (
         requestUrl: String,

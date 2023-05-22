@@ -1,3 +1,5 @@
+import Foundation
+
 func substractDate(unit: EDateTimeUnit, value: Int) -> Int {
     let negativeValue = value < 0 ? value : value * -1
     let byAdding: Calendar.Component

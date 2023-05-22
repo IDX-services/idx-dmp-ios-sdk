@@ -12,7 +12,7 @@ final class Logger {
     }
     
     private func printMessage(_ message: String) {
-        NSLog("[DMP Log]: \(message)")
+        debugPrint("[DMP Log]: \(message)")
     }
 
     func log(_ message: String) {

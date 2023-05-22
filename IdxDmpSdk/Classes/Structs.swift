@@ -1,3 +1,5 @@
+import Foundation
+
 struct BehaviourStruct: Decodable {
     let uuid: String
     let code: String

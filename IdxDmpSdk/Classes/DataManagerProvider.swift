@@ -1,3 +1,5 @@
+import Foundation
+
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
