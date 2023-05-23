@@ -1,10 +1,11 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.5
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "idx-dmp-ios-sdk",
+    platforms: [.iOS(.v14)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
@@ -12,7 +13,7 @@ let package = Package(
             targets: ["idx-dmp-ios-sdk"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/realm/realm-swift.git", exact: "10.33.0"),
+        .package(url: "https://github.com/realm/realm-swift.git", from: "10.33.0"),
         .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads.git", from: "9.9.0"),
     ],
     targets: [
