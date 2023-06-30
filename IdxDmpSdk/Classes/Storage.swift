@@ -1,89 +1,198 @@
-import RealmSwift
+import CoreData
 
 func getEventComputedId(eventStruct: EventStruct) -> String {
     return "\(eventStruct.defId)_\(eventStruct.behaviourCode)"
 }
 
-class Behaviour: EmbeddedObject {
-    @Persisted var uuid: String
-    @Persisted var code: String
-    @Persisted var ordinalNum: Int
-    @Persisted var frequencyOperator: EFrequencyOperator?
-    @Persisted var frequencyMin: Int?
-    @Persisted var frequencyMax: Int?
-    @Persisted var frequencyValue: Int?
-    @Persisted var durationUnit: EDateTimeUnit?
-    @Persisted var durationOperator: EDurationOperator?
-    @Persisted var durationMinDate: Date?
-    @Persisted var durationMaxDate: Date?
-    @Persisted var durationValue: Int?
+public class Behaviour: NSObject, NSSecureCoding {
+    var uuid: String
+    var code: String
+    var ordinalNum: Int
+    var frequencyOperator: EFrequencyOperator?
+    var frequencyMin: Int?
+    var frequencyMax: Int?
+    var frequencyValue: Int?
+    var durationUnit: EDateTimeUnit?
+    var durationOperator: EDurationOperator?
+    var durationMinDate: NSDate?
+    var durationMaxDate: NSDate?
+    var durationValue: Int?
     
-    convenience init(behaviourStruct: BehaviourStruct) {
-        self.init()
+    public static var supportsSecureCoding: Bool = true
+    
+    public func encode(with coder: NSCoder) {
+        coder.encode(uuid, forKey: "uuid")
+        coder.encode(code, forKey: "code")
+        coder.encode(ordinalNum, forKey: "ordinalNum")
+        coder.encode(frequencyOperator?.rawValue, forKey: "frequencyOperator")
+        coder.encode(frequencyMin, forKey: "frequencyMin")
+        coder.encode(frequencyMax, forKey: "frequencyMax")
+        coder.encode(frequencyValue, forKey: "frequencyValue")
+        coder.encode(durationUnit?.rawValue, forKey: "durationUnit")
+        coder.encode(durationOperator?.rawValue, forKey: "durationOperator")
+        coder.encode(durationMinDate, forKey: "durationMinDate")
+        coder.encode(durationMaxDate, forKey: "durationMaxDate")
+        coder.encode(durationValue, forKey: "durationValue")
+    }
+    
+    public required convenience init?(coder: NSCoder) {
+        let rawFrecuencyOperator = coder.decodeObject(forKey: "frequencyOperator") as? String
+        let rawDurationUnit = coder.decodeObject(forKey: "durationUnit") as? String
+        let rawDurationOperator = coder.decodeObject(forKey: "durationOperator") as? String
+
+        self.init(behaviourStruct: BehaviourStruct(
+            uuid: coder.decodeObject(forKey: "uuid") as! String,
+            code: coder.decodeObject(forKey: "code") as! String,
+            ordinalNum: coder.decodeInteger(forKey: "ordinalNum"),
+            frequencyOperator: (rawFrecuencyOperator != nil) ? EFrequencyOperator(rawValue: rawFrecuencyOperator!) : nil,
+            frequencyMin: coder.decodeObject(forKey: "frequencyMin") as? Int,
+            frequencyMax: coder.decodeObject(forKey: "frequencyMax") as? Int,
+            frequencyValue: coder.decodeObject(forKey: "frequencyValue") as? Int,
+            durationUnit: (rawDurationUnit != nil) ? EDateTimeUnit(rawValue: rawDurationUnit!) : nil,
+            durationOperator: (rawDurationOperator != nil) ? EDurationOperator(rawValue: rawDurationOperator!) : nil,
+            durationMinDate: coder.decodeObject(forKey: "durationMinDate") as? Date,
+            durationMaxDate: coder.decodeObject(forKey: "durationMaxDate") as? Date,
+            durationValue: coder.decodeObject(forKey: "durationValue") as? Int
+        ))
+    }
+    
+    init(behaviourStruct: BehaviourStruct) {
         self.uuid = behaviourStruct.uuid
         self.code = behaviourStruct.code
+        self.ordinalNum = behaviourStruct.ordinalNum
         self.frequencyOperator = behaviourStruct.frequencyOperator
         self.frequencyMin = behaviourStruct.frequencyMin
         self.frequencyMax = behaviourStruct.frequencyMax
         self.frequencyValue = behaviourStruct.frequencyValue
         self.durationUnit = behaviourStruct.durationUnit
         self.durationOperator = behaviourStruct.durationOperator
-        self.durationMinDate = behaviourStruct.durationMinDate
-        self.durationMaxDate = behaviourStruct.durationMaxDate
+        self.durationMinDate = behaviourStruct.durationMinDate as? NSDate
+        self.durationMaxDate = behaviourStruct.durationMaxDate as? NSDate
         self.durationValue = behaviourStruct.durationValue
     }
 }
 
-class Definition: Object {
-    @Persisted(primaryKey: true) var defId: String
-    @Persisted var uuid: String
-    @Persisted var code: String
-    @Persisted var revision: Int
-    @Persisted var status: EDefinitionStatus
-    @Persisted var behaviours: List<Behaviour> = List<Behaviour>()
-    @Persisted var behaviourOperators: List<EBehaviourType> = List<EBehaviourType>()
-    @Persisted var lastModifiedDate: String
+extension Definition {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Definition> {
+        return NSFetchRequest<Definition>(entityName: "Definition")
+    }
 
-    convenience init(definitionStruct: DefinitionStruct) {
-        self.init()
-        self.defId = definitionStruct.defId
-        self.uuid = definitionStruct.uuid
-        self.code = definitionStruct.code
-        self.status = definitionStruct.status
-        definitionStruct.behaviours.forEach { behaviour in
-            self.behaviours.append(Behaviour(behaviourStruct: behaviour))
+    @NSManaged public var behaviours: [Behaviour]
+    @NSManaged public var code: String
+    @NSManaged public var defId: String
+    @NSManaged public var lastModifiedDate: String
+    @NSManaged public var revision: Int16
+    @NSManaged public var uuid: UUID
+    
+    @NSManaged private var statusRaw: String
+    @NSManaged private var behaviourOperatorsRaw: NSArray
+    
+    public var status: EDefinitionStatus {
+        get {
+            return EDefinitionStatus(rawValue: self.statusRaw) ?? .INDEXING
         }
-        definitionStruct.behaviourOperators.forEach { behaviourOperator in
-            self.behaviourOperators.append(behaviourOperator)
+        set {
+            self.statusRaw = String(newValue.rawValue)
         }
-        self.lastModifiedDate = definitionStruct.lastModifiedDate
+    }
+    
+    public var behaviourOperators: [EBehaviourType] {
+        get {
+            return behaviourOperatorsRaw.map {val in
+                EBehaviourType(rawValue: val as! String)!
+            }
+        }
+        set {
+            self.behaviourOperatorsRaw = newValue.map {val in
+                val.rawValue
+            } as NSArray
+        }
+    }
+    
+    public func setData(definitionStruct: DefinitionStruct) {
+        defId = definitionStruct.defId
+        revision = Int16(definitionStruct.revision)
+        status = definitionStruct.status
+        code = definitionStruct.code
+        uuid = UUID(uuidString: definitionStruct.uuid)!
+
+        lastModifiedDate = definitionStruct.lastModifiedDate
+        behaviours = definitionStruct.behaviours.map {behaviour in
+            Behaviour(behaviourStruct: behaviour)
+        }
+        behaviourOperators = definitionStruct.behaviourOperators
     }
 }
 
-class Event: Object {
-    @Persisted(primaryKey: true) var computedId: String
-    @Persisted var defId: String
-    @Persisted var behaviourCode: String
-    @Persisted var timestamps: List<Int>
+@objc(Definition)
+class Definition: NSManagedObject {
+
+}
+
+extension Event {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Event> {
+        return NSFetchRequest<Event>(entityName: "Event")
+    }
+
+    @NSManaged public var computedId: String
+    @NSManaged public var defId: String
+    @NSManaged public var behaviourCode: String
+    @NSManaged public var timestamps: NSArray
     
-    convenience init(eventStruct: EventStruct) {
-        self.init()
-        self.computedId = getEventComputedId(eventStruct: eventStruct)
-        self.defId = eventStruct.defId
-        self.behaviourCode = eventStruct.behaviourCode
-        eventStruct.timestamps.forEach { timestamp in
-            self.timestamps.append(timestamp)
-        }
+    public func setData(eventStruct: EventStruct) {
+        computedId = getEventComputedId(eventStruct: eventStruct)
+        defId = eventStruct.defId
+        behaviourCode = eventStruct.behaviourCode
+        timestamps = eventStruct.timestamps as NSArray
+    }
+}
+
+@objc(Event)
+class Event: NSManagedObject {
+
+}
+
+extension StorageTransformer {
+    static let name = NSValueTransformerName(rawValue: String(describing: StorageTransformer.self))
+    
+    public static func register() {
+        let transformer = StorageTransformer()
+        ValueTransformer.setValueTransformer(transformer, forName: name)
+    }
+}
+
+@objc(StorageTransformer)
+class StorageTransformer: NSSecureUnarchiveFromDataTransformer {
+    override static var allowedTopLevelClasses: [AnyClass] {
+        [Behaviour.self, NSArray.self, NSString.self, NSNumber.self, NSDate.self]
     }
 }
 
 final class Storage {
-    private var database: Realm
-    
+    private var storeContainer: NSPersistentContainer
+    private var managedContext: NSManagedObjectContext
+
     public init() throws {
         do {
-            let configuration = Realm.Configuration(deleteRealmIfMigrationNeeded: true)
-            database = try Realm(configuration: configuration)
+            StorageTransformer.register()
+            
+            let modelURL = Bundle(for: Storage.self).url(forResource: "IdxDmpSdkStorage", withExtension: "momd")
+            var container: NSPersistentContainer
+
+            guard let model = modelURL.flatMap(NSManagedObjectModel.init) else {
+                throw EDMPError.databaseConnectFailed
+            }
+
+            container = NSPersistentContainer(name: "IdxDmpSdkStorage", managedObjectModel: model)
+            container.loadPersistentStores(completionHandler: {(storeDescription, error) in
+                if let error = error as NSError? {
+                    fatalError("Unresolved error \(error), \(error.userInfo)")
+                }
+            })
+            container.viewContext.mergePolicy = NSOverwriteMergePolicy
+
+            storeContainer = container
+            managedContext = container.viewContext
         } catch {
             throw EDMPError.databaseConnectFailed
         }
@@ -91,26 +200,28 @@ final class Storage {
     
     public func setDefinitions(definitions: [DefinitionStruct]) throws {
         do {
-            try self.database.write() {
-                definitions.forEach { definition in
-                    let def = Definition(definitionStruct: definition)
-                    self.database.add(def, update: .all)
-                }
+            definitions.forEach { definitionStruct in
+                let definition = Definition(context: managedContext)
+                definition.setData(definitionStruct: definitionStruct)
             }
+
+            try managedContext.save()
         } catch {
             throw EDMPError.setDefinitionsFailed
         }
     }
     
-    public func getDefinitions() -> Results<Definition> {
-        return self.database.objects(Definition.self)
+    public func getDefinitions() -> [Definition] {
+        do {
+            return try managedContext.fetch(Definition.fetchRequest())
+        } catch {
+            return []
+        }
     }
     
     public func removeAllDefinitions() throws {
         do {
-            try self.database.write() {
-                self.database.delete(self.getDefinitions())
-            }
+            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: "Definition")))
         } catch {
             throw EDMPError.removeAllDefinitions
         }
@@ -118,26 +229,45 @@ final class Storage {
     
     public func setEvents(events: [EventStruct]) throws {
         do {
-            try self.database.write() {
-                events.forEach { event in
-                    let event = Event(eventStruct: event)
-                    self.database.add(event, update: .all)
-                }
+            events.forEach { eventStruct in
+                let event = Event(context: managedContext)
+                event.setData(eventStruct: eventStruct)
             }
+            
+            try managedContext.save()
         } catch {
             throw EDMPError.setEventsFailed
         }
     }
     
-    public func getEvents() -> Results<Event> {
-        return self.database.objects(Event.self)
+    public func getEvents() -> [Event] {
+        do {
+            return try managedContext.fetch(Event.fetchRequest())
+        } catch {
+            return []
+        }
+    }
+    
+    public func removeEventsByDefinitions(_ definitionIds: [String]) throws {
+        do {
+            if (definitionIds.isEmpty) {
+                return
+            }
+            
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Event")
+            request.predicate = NSPredicate(
+                format: "defId IN %@", definitionIds
+            )
+            
+            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: request))
+        } catch {
+            throw EDMPError.removePartialEvents
+        }
     }
     
     public func removeAllEvents() throws {
         do {
-            try self.database.write() {
-                self.database.delete(self.getEvents())
-            }
+            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: "Event")))
         } catch {
             throw EDMPError.removeAllEvents
         }
@@ -145,29 +275,26 @@ final class Storage {
     
     public func mergeEvents(newEvents: [EventStruct]) throws {
         let oldEvents = self.getEvents()
-        
-        do {
-            try self.database.write() {
-                newEvents.forEach { eventStruct in
-                    let currentOldEvent: Event! = oldEvents.first(where: {$0.computedId == getEventComputedId(eventStruct: eventStruct)})
 
-                    if (currentOldEvent != nil) {
-                        eventStruct.timestamps.forEach {t in
-                            currentOldEvent.timestamps.append(t)
-                        }
-                        currentOldEvent.timestamps.sort { a, b in
-                            return b > a
-                        }
-                        let removeCount = currentOldEvent.timestamps.count - Config.Constant.maxEventCount
-                        if (removeCount > 0) {
-                            currentOldEvent.timestamps.removeFirst(removeCount)
-                        }
-                    } else {
-                        let event = Event(eventStruct: eventStruct)
-                        self.database.add(event, update: .all)
+        do {
+            newEvents.forEach { eventStruct in
+                if let currentOldEvent: Event = oldEvents.first(
+                    where: {$0.computedId == getEventComputedId(eventStruct: eventStruct)}
+                ) {
+                    currentOldEvent.timestamps = currentOldEvent.timestamps
+                        .addingObjects(from: eventStruct.timestamps)
+                        .sorted {a, b in (a as! Int) > (b as! Int)} as NSArray
+                    let removeCount = currentOldEvent.timestamps.count - Config.Constant.maxEventCount
+                    if (removeCount > 0) {
+                        currentOldEvent.timestamps = currentOldEvent.timestamps.dropLast(removeCount) as NSArray
                     }
+                } else {
+                    let event = Event(context: managedContext)
+                    event.setData(eventStruct: eventStruct)
                 }
             }
+
+            try managedContext.save()
         } catch {
             throw EDMPError.mergeEventsFailed
         }
@@ -175,9 +302,8 @@ final class Storage {
     
     public func removeStorageData() throws {
         do {
-            try self.database.write() {
-                self.database.deleteAll()
-            }
+            try self.removeAllEvents()
+            try self.removeAllDefinitions()
         } catch {
             throw EDMPError.removeAllStorage
         }

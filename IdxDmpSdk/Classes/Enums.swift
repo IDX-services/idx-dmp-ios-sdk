@@ -1,14 +1,12 @@
-import RealmSwift
-
 enum EDMPEvent: String, Encodable {
     case PAGE_VIEW
 }
 
-enum EDefinitionStatus: String, Decodable, PersistableEnum {
+enum EDefinitionStatus: String, Decodable {
     case INDEXING, ACTIVATED
 }
 
-enum EFrequencyOperator: String, Decodable, PersistableEnum {
+enum EFrequencyOperator: String, Decodable {
     case EXACTLY,
     BETWEEN,
     AT_MOST,
@@ -16,14 +14,14 @@ enum EFrequencyOperator: String, Decodable, PersistableEnum {
     NOT_DEFINED
 }
 
-enum EDateTimeUnit: String, Decodable, PersistableEnum {
+enum EDateTimeUnit: String, Decodable {
     case HOURS,
     DAYS,
     WEEKS,
     MONTHS
 }
 
-enum EDurationOperator: String, Decodable, PersistableEnum {
+enum EDurationOperator: String, Decodable {
     case ALL,
     LAST,
     AFTER,
@@ -32,7 +30,7 @@ enum EDurationOperator: String, Decodable, PersistableEnum {
     CURRENT_PAGE
 }
 
-enum EBehaviourType: String, Decodable, PersistableEnum {
+enum EBehaviourType: String, Decodable {
     case OR, AND
 }
 
@@ -50,6 +48,7 @@ enum EDMPError: Error {
     case removeAllEvents
     case removeAllDefinitions
     case removeAllStorage
+    case removePartialEvents
     case databaseConnectFailed
     case userIdIsEmpty
     case userDataIsEmpty

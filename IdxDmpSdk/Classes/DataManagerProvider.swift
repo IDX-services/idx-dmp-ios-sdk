@@ -71,6 +71,7 @@ public final class DataManagerProvider {
             }
             try databaseConnection.setDefinitions(definitions: userState.definitions)
             try databaseConnection.mergeEvents(newEvents: userState.events)
+            try databaseConnection.removeEventsByDefinitions(userState.deletedDefinitionIds)
         } catch {
             logger.error(error)
         }

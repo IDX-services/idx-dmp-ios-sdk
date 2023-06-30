@@ -105,7 +105,7 @@ func matchDefinitions(events: [Event], definitions: [Definition]) -> [String] {
             var eventBehaviourTimestamps: [Int] = []
             eventsByDefinition.forEach({ event in
                 if (event.behaviourCode == behaviour.code) {
-                    eventBehaviourTimestamps.append(contentsOf: event.timestamps)
+                    eventBehaviourTimestamps.append(contentsOf: event.timestamps as! [Int])
                 }
             })
             

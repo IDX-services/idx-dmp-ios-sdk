@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IdxDmpSdk'
-  s.version          = '1.0.1'
+  s.version          = '1.0.2'
   s.summary          = 'IDX DMP iOS SDK'
   s.swift_version    = '5.7'
 
@@ -29,15 +29,16 @@ TODO: Add long description of the pod here.
   s.source           = { :git => 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '11.0'
+  s.ios.deployment_target = '12.0'
 
   s.source_files = 'IdxDmpSdk/Classes/**/*'
   
+  s.resources = "IdxDmpSdk/*.xcdatamodeld"
   # s.resource_bundles = {
   #   'IdxDmpSdk' => ['IdxDmpSdk/Assets/*.png']
   # }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  s.dependency 'RealmSwift', '10.33.0'
+  # s.dependency 'RealmSwift', '10.33.0'
 end
