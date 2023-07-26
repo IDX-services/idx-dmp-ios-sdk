@@ -12,7 +12,11 @@ public final class DataManagerProvider {
         self.providerId = providerId
         
         do {
-            databaseStorage = try Storage()
+            if #available(iOS 12.0, *) {
+                databaseStorage = try Storage()
+            } else {
+                throw EDMPError.databaseConnectFailed
+            }
             self.getState(completionHandler: completionHandler)
         } catch {
             databaseStorage = nil

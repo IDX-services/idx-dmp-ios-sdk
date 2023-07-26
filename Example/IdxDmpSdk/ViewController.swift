@@ -59,7 +59,7 @@ class ViewController: UIViewController {
             tags: textFieldTags.text?.components(separatedBy: ",") ?? []
         )
 
-        self.dmp!.sendEvent(properties: requestProps) { error in
+        self.dmp?.sendEvent(properties: requestProps) { error in
             if (error != nil) {
                 self.dmp!.resetState()
             }
