@@ -47,6 +47,7 @@ public struct EventRequestPropertiesStruct: Encodable {
     public let category: String
     public let description: String
     public let tags: [String]
+    public let devicePlatform: String
 
     public init(
         url: String,
@@ -64,6 +65,7 @@ public struct EventRequestPropertiesStruct: Encodable {
         self.category = category
         self.description = description
         self.tags = tags
+        self.devicePlatform = "MOBILE_APP"
     }
 }
 

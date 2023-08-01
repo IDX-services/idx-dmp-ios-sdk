@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IdxDmpSdk'
-  s.version          = '1.0.3'
+  s.version          = '1.0.4'
   s.summary          = 'IDX DMP iOS SDK'
   s.swift_version    = '5.7'
 
