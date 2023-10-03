@@ -40,6 +40,14 @@ public final class DataManagerProvider {
         return localStorage.string(forKey: "ts")
     }
     
+    private func setPrevDefinitionIds(_ definitionIds: [String]) {
+        localStorage.set(definitionIds, forKey: "prevDefinitionids")
+    }
+    
+    private func getPrevDefinitionIds() -> [String] {
+        return localStorage.stringArray(forKey: "prevDefinitionids") ?? []
+    }
+    
     public func getProviderId() -> String {
         return providerId
     }
@@ -75,6 +83,7 @@ public final class DataManagerProvider {
             }
             try databaseConnection.setDefinitions(definitions: userState.definitions)
             try databaseConnection.mergeEvents(newEvents: userState.events)
+            try databaseConnection.removeDefinitions(userState.deletedDefinitionIds)
             try databaseConnection.removeEventsByDefinitions(userState.deletedDefinitionIds)
         } catch {
             logger.error(error)
@@ -101,7 +110,13 @@ public final class DataManagerProvider {
             return
         }
         
-        self.definitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
+        let matchedDefinitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
+        
+        self.sendStatisticEvent(newDefinitionsIds: matchedDefinitionIds, definitions: definitions)
+        
+        self.definitionIds = matchedDefinitionIds
+        self.setPrevDefinitionIds(matchedDefinitionIds)
+        
         self.removeOneTimeEvents()
     }
     
@@ -116,7 +131,7 @@ public final class DataManagerProvider {
                 queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
             ) {(data, error) in
                 self.updateUserState(data: data)
-                
+
                 if (!self.initIsComplete) {
                     self.initIsComplete = true
                     self.eventRequestQueue.forEach { eventQueueItem in
@@ -132,6 +147,56 @@ public final class DataManagerProvider {
         } catch {
             completionHandler(error)
             logger.error(error)
+        }
+    }
+    
+    private func sendStatisticEvent(newDefinitionsIds: [String], definitions: [Definition]) {
+        guard let userId = getUserId() else {
+            return logger.error(EDMPError.userIdIsEmpty)
+        }
+        
+        let oldDefinitionIds = self.getPrevDefinitionIds()
+        
+        let enterAndExitDefinitionIds = getEnterAndExitDefinitionIds(oldDefinitionIds: oldDefinitionIds, newDefinitionIds: newDefinitionsIds, definitions: definitions)
+
+        enterAndExitDefinitionIds.enterIds.forEach { id in
+            let eventBody = StatisticEventRequestStruct(
+                event: EDMPStatisticEvent.AUDIENCE_ENTER,
+                userId: userId,
+                providerId: self.providerId,
+                audienceCode: id,
+                actualAudienceCodes: oldDefinitionIds
+            )
+            
+            do {
+                try Api.post(
+                    url: Config.Api.eventUrl,
+                    queryItems: ["ts": getTimestamp(), "dmpid": userId],
+                    body: eventBody
+                )
+            } catch {
+                logger.error(error)
+            }
+        }
+        
+        enterAndExitDefinitionIds.exitIds.forEach { id in
+            let eventBody = StatisticEventRequestStruct(
+                event: EDMPStatisticEvent.AUDIENCE_EXIT,
+                userId: userId,
+                providerId: self.providerId,
+                audienceCode: id,
+                actualAudienceCodes: oldDefinitionIds
+            )
+            
+            do {
+                try Api.post(
+                    url: Config.Api.eventUrl,
+                    queryItems: ["ts": getTimestamp(), "dmpid": userId],
+                    body: eventBody
+                )
+            } catch {
+                logger.error(error)
+            }
         }
     }
     

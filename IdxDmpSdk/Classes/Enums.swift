@@ -2,8 +2,12 @@ enum EDMPEvent: String, Encodable {
     case PAGE_VIEW
 }
 
+enum EDMPStatisticEvent: String, Encodable {
+    case AUDIENCE_ENTER, AUDIENCE_EXIT
+}
+
 enum EDefinitionType: String, Decodable {
-    case STANDART, CURRENT_PAGE
+    case STANDARD, CURRENT_PAGE
 }
 
 enum EDefinitionStatus: String, Decodable {
@@ -34,7 +38,7 @@ enum EDurationOperator: String, Decodable {
 }
 
 enum EBehaviourType: String, Decodable {
-    case CURRENT_PAGE
+    case MAIN, CURRENT_PAGE
 }
 
 enum EBehaviourOperator: String, Decodable {

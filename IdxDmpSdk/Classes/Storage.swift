@@ -25,7 +25,7 @@ public class Behaviour: NSObject, NSSecureCoding {
         coder.encode(uuid, forKey: "uuid")
         coder.encode(code, forKey: "code")
         coder.encode(ordinalNum, forKey: "ordinalNum")
-        coder.encode(behaviourType, forKey: "behaviourType")
+        coder.encode(behaviourType?.rawValue, forKey: "behaviourType")
         coder.encode(frequencyOperator?.rawValue, forKey: "frequencyOperator")
         coder.encode(frequencyMin, forKey: "frequencyMin")
         coder.encode(frequencyMax, forKey: "frequencyMax")
@@ -86,6 +86,7 @@ extension Definition {
     @NSManaged public var code: String
     @NSManaged public var defId: String
     @NSManaged public var lastModifiedDate: String
+    @NSManaged public var debugEnabled: Bool
     @NSManaged public var revision: Int16
     @NSManaged public var uuid: UUID
     
@@ -95,7 +96,7 @@ extension Definition {
     
     public var type: EDefinitionType {
         get {
-            return EDefinitionType(rawValue: self.typeRaw) ?? .STANDART
+            return EDefinitionType(rawValue: self.typeRaw) ?? .STANDARD
         }
         set {
             self.typeRaw = String(newValue.rawValue)
@@ -127,12 +128,13 @@ extension Definition {
     public func setData(definitionStruct: DefinitionStruct) {
         defId = definitionStruct.defId
         revision = Int16(definitionStruct.revision)
-        type = definitionStruct.type ?? .STANDART
+        type = definitionStruct.type ?? .STANDARD
         status = definitionStruct.status
         code = definitionStruct.code
         uuid = UUID(uuidString: definitionStruct.uuid)!
-
         lastModifiedDate = definitionStruct.lastModifiedDate
+        debugEnabled = definitionStruct.debugEnabled ?? false
+
         behaviours = definitionStruct.behaviours.map {behaviour in
             Behaviour(behaviourStruct: behaviour)
         }
@@ -238,6 +240,23 @@ final class Storage {
             return try managedContext.fetch(Definition.fetchRequest())
         } catch {
             return []
+        }
+    }
+    
+    public func removeDefinitions(_ definitionIds: [String]) throws {
+        do {
+            if (definitionIds.isEmpty) {
+                return
+            }
+            
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Definition")
+            request.predicate = NSPredicate(
+                format: "defId IN %@", definitionIds
+            )
+            
+            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: request))
+        } catch {
+            throw EDMPError.removePartialEvents
         }
     }
     

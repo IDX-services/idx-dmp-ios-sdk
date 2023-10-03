@@ -124,3 +124,26 @@ func matchDefinitions(events: [Event], definitions: [Definition]) -> [String] {
     
     return Array(Set(definitonIds))
 }
+
+private func isDefinitionDebugEnabled(id: String, definitions: [Definition]) -> Bool {
+    return definitions
+        .filter { $0.code == id }
+        .sorted(by: { $0.revision > $1.revision })
+        .first?.debugEnabled ?? false
+}
+
+func getEnterAndExitDefinitionIds(
+    oldDefinitionIds: [String],
+    newDefinitionIds: [String],
+    definitions: [Definition]) -> EnterAndExitDefinitionIds
+{
+    let enterIds = newDefinitionIds.filter { id in
+        return !oldDefinitionIds.contains(id) && isDefinitionDebugEnabled(id: id, definitions: definitions)
+    }
+
+    let exitIds = oldDefinitionIds.filter { id in
+        return !newDefinitionIds.contains(id) && isDefinitionDebugEnabled(id: id, definitions: definitions)
+    }
+
+    return EnterAndExitDefinitionIds(enterIds: enterIds, exitIds: exitIds)
+}

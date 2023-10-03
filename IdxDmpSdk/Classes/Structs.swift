@@ -24,6 +24,7 @@ struct DefinitionStruct: Decodable {
     let behaviours: [BehaviourStruct]
     let behaviourOperators: [EBehaviourOperator]
     let lastModifiedDate: String
+    let debugEnabled: Bool?
 }
 
 struct EventStruct: Decodable {
@@ -81,4 +82,17 @@ public struct EventRequestStruct: Encodable {
 struct EventQueueItem {
     let properties: EventRequestPropertiesStruct
     let callback: (Any?) -> Void
+}
+
+struct EnterAndExitDefinitionIds {
+    let enterIds: [String]
+    let exitIds: [String]
+}
+
+struct StatisticEventRequestStruct: Encodable {
+    let event: EDMPStatisticEvent
+    let userId: String
+    let providerId: String
+    let audienceCode: String
+    let actualAudienceCodes: [String]
 }

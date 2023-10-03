@@ -4,6 +4,7 @@
         <attribute name="behaviourOperatorsRaw" optional="YES" attributeType="Transformable" valueTransformerName="StorageTransformer" customClassName="NSArray"/>
         <attribute name="behaviours" optional="YES" attributeType="Transformable" valueTransformerName="StorageTransformer" customClassName="Behaviour"/>
         <attribute name="code" optional="YES" attributeType="String"/>
+        <attribute name="debugEnabled" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="defId" optional="YES" attributeType="String"/>
         <attribute name="lastModifiedDate" optional="YES" attributeType="String"/>
         <attribute name="revision" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>

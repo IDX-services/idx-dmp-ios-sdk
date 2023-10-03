@@ -55,18 +55,18 @@ final class Api {
     static func get(
         url: String,
         queryItems: [String: String?]? = nil,
-        completionHandler: @escaping (Data?, Error?) -> Void
+        completionHandler: ((Data?, Error?) -> Void)? = { _,_ in }
     ) throws {
         let request = try makeRequest(requestUrl: url, method: "GET", queryItems: queryItems)
 
-        sendRequest(request: request, completionHandler: completionHandler)
+        sendRequest(request: request, completionHandler: completionHandler!)
     }
     
     static func post(
         url: String,
         queryItems: [String: String?]? = nil,
         body: Encodable? = nil,
-        completionHandler: @escaping (Data?, Error?) -> Void
+        completionHandler: ((Data?, Error?) -> Void)? = { _,_ in }
     ) throws {
         var request = try makeRequest(requestUrl: url, method: "POST", queryItems: queryItems)
         
@@ -74,6 +74,6 @@ final class Api {
             request.httpBody = try JSONEncoder().encode(body)
         }
         
-        sendRequest(request: request, completionHandler: completionHandler)
+        sendRequest(request: request, completionHandler: completionHandler!)
     }
 }
