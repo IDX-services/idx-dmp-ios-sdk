@@ -2,6 +2,7 @@ struct BehaviourStruct: Decodable {
     let uuid: String
     let code: String
     let ordinalNum: Int
+    let behaviourType: EBehaviourType?
     let frequencyOperator: EFrequencyOperator?
     let frequencyMin: Int?
     let frequencyMax: Int?
@@ -18,9 +19,10 @@ struct DefinitionStruct: Decodable {
     let uuid: String
     let code: String
     let revision: Int
+    let type: EDefinitionType?
     let status: EDefinitionStatus
     let behaviours: [BehaviourStruct]
-    let behaviourOperators: [EBehaviourType]
+    let behaviourOperators: [EBehaviourOperator]
     let lastModifiedDate: String
 }
 

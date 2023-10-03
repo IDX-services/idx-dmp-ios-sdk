@@ -2,6 +2,10 @@ enum EDMPEvent: String, Encodable {
     case PAGE_VIEW
 }
 
+enum EDefinitionType: String, Decodable {
+    case STANDART, CURRENT_PAGE
+}
+
 enum EDefinitionStatus: String, Decodable {
     case INDEXING, ACTIVATED
 }
@@ -26,11 +30,14 @@ enum EDurationOperator: String, Decodable {
     LAST,
     AFTER,
     BEFORE,
-    BETWEEN,
-    CURRENT_PAGE
+    BETWEEN
 }
 
 enum EBehaviourType: String, Decodable {
+    case CURRENT_PAGE
+}
+
+enum EBehaviourOperator: String, Decodable {
     case OR, AND
 }
 
@@ -48,6 +55,7 @@ enum EDMPError: Error {
     case removeAllEvents
     case removeAllDefinitions
     case removeAllStorage
+    case removeOneTimeEvents
     case removePartialEvents
     case databaseConnectFailed
     case userIdIsEmpty

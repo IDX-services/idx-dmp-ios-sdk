@@ -81,6 +81,19 @@ public final class DataManagerProvider {
         }
     }
     
+    private func removeOneTimeEvents() {
+        do {
+            guard let databaseConnection = self.databaseStorage else {
+                logger.error(EDMPError.databaseConnectFailed)
+                return
+            }
+
+            try databaseConnection.removeOneTimeEvents()
+        } catch {
+            logger.error(error)
+        }
+    }
+    
     private func calculateAudiences() {
         guard let events = self.databaseStorage?.getEvents(),
               let definitions = self.databaseStorage?.getDefinitions() else {
@@ -89,6 +102,7 @@ public final class DataManagerProvider {
         }
         
         self.definitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
+        self.removeOneTimeEvents()
     }
     
     public func getDefinitionIds() -> String {

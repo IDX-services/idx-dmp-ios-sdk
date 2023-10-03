@@ -18,7 +18,7 @@ func substractDate(unit: EDateTimeUnit, value: Int) -> Int {
 
 func matchDuration(behaviour: Behaviour, eventTimestamps: [Int]) -> [Int] {
     switch behaviour.durationOperator {
-    case .ALL, .CURRENT_PAGE:
+    case .ALL:
         return eventTimestamps
     case .LAST:
         if (behaviour.durationUnit == nil || behaviour.durationValue == nil) {
@@ -89,34 +89,35 @@ func matchDefinitions(events: [Event], definitions: [Definition]) -> [String] {
         
         var isMatch = true
         
-        definition.behaviours.sorted(by: { $0.ordinalNum < $1.ordinalNum }).enumerated().forEach({ (index, behaviour) in
-            let behaviourOperator = index > 0 && definition.behaviourOperators.count > 0
-                ? definition.behaviourOperators[index - 1]
-                : EBehaviourType.AND
-            
-            if (isMatch && behaviourOperator == EBehaviourType.OR) {
-                return
-            }
-            
-            if (!isMatch && behaviourOperator == EBehaviourType.AND) {
-                return
-            }
-            
-            var eventBehaviourTimestamps: [Int] = []
-            eventsByDefinition.forEach({ event in
-                if (event.behaviourCode == behaviour.code) {
-                    eventBehaviourTimestamps.append(contentsOf: event.timestamps as! [Int])
+        if (definition.type != EDefinitionType.CURRENT_PAGE) {
+            definition.behaviours.sorted(by: { $0.ordinalNum < $1.ordinalNum }).enumerated().forEach({ (index, behaviour) in
+                let behaviourOperator = index > 0 && definition.behaviourOperators.count > 0
+                    ? definition.behaviourOperators[index - 1]
+                    : EBehaviourOperator.AND
+                
+                if (isMatch && behaviourOperator == EBehaviourOperator.OR) {
+                    return
                 }
-            })
-            
-            let matchedTimestamps: [Int] =
-                matchDuration(behaviour: behaviour, eventTimestamps: eventBehaviourTimestamps)
-            
-            let frequencyIsMatched = behaviour.durationOperator == EDurationOperator.CURRENT_PAGE
-                || matchFrequency(behaviour: behaviour, eventTimestamps: matchedTimestamps)
+                
+                if (!isMatch && behaviourOperator == EBehaviourOperator.AND) {
+                    return
+                }
+                
+                var eventBehaviourTimestamps: [Int] = []
+                eventsByDefinition.forEach({ event in
+                    if (event.behaviourCode == behaviour.code) {
+                        eventBehaviourTimestamps.append(contentsOf: event.timestamps as! [Int])
+                    }
+                })
+                
+                let matchedTimestamps: [Int] =
+                    matchDuration(behaviour: behaviour, eventTimestamps: eventBehaviourTimestamps)
+                
+                let frequencyIsMatched = matchFrequency(behaviour: behaviour, eventTimestamps: matchedTimestamps)
 
-            isMatch = frequencyIsMatched && matchedTimestamps.count > 0
-        })
+                isMatch = frequencyIsMatched && matchedTimestamps.count > 0
+            })
+        }
 
         return isMatch
     }.map({ return $0.code })

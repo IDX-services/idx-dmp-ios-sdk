@@ -8,6 +8,7 @@ public class Behaviour: NSObject, NSSecureCoding {
     var uuid: String
     var code: String
     var ordinalNum: Int
+    var behaviourType: EBehaviourType?
     var frequencyOperator: EFrequencyOperator?
     var frequencyMin: Int?
     var frequencyMax: Int?
@@ -24,6 +25,7 @@ public class Behaviour: NSObject, NSSecureCoding {
         coder.encode(uuid, forKey: "uuid")
         coder.encode(code, forKey: "code")
         coder.encode(ordinalNum, forKey: "ordinalNum")
+        coder.encode(behaviourType, forKey: "behaviourType")
         coder.encode(frequencyOperator?.rawValue, forKey: "frequencyOperator")
         coder.encode(frequencyMin, forKey: "frequencyMin")
         coder.encode(frequencyMax, forKey: "frequencyMax")
@@ -36,6 +38,7 @@ public class Behaviour: NSObject, NSSecureCoding {
     }
     
     public required convenience init?(coder: NSCoder) {
+        let rawBehaviourType = coder.decodeObject(forKey: "behaviourType") as? String
         let rawFrecuencyOperator = coder.decodeObject(forKey: "frequencyOperator") as? String
         let rawDurationUnit = coder.decodeObject(forKey: "durationUnit") as? String
         let rawDurationOperator = coder.decodeObject(forKey: "durationOperator") as? String
@@ -44,6 +47,7 @@ public class Behaviour: NSObject, NSSecureCoding {
             uuid: coder.decodeObject(forKey: "uuid") as! String,
             code: coder.decodeObject(forKey: "code") as! String,
             ordinalNum: coder.decodeInteger(forKey: "ordinalNum"),
+            behaviourType: (rawBehaviourType != nil) ? EBehaviourType(rawValue: rawBehaviourType!) : nil,
             frequencyOperator: (rawFrecuencyOperator != nil) ? EFrequencyOperator(rawValue: rawFrecuencyOperator!) : nil,
             frequencyMin: coder.decodeObject(forKey: "frequencyMin") as? Int,
             frequencyMax: coder.decodeObject(forKey: "frequencyMax") as? Int,
@@ -60,6 +64,7 @@ public class Behaviour: NSObject, NSSecureCoding {
         self.uuid = behaviourStruct.uuid
         self.code = behaviourStruct.code
         self.ordinalNum = behaviourStruct.ordinalNum
+        self.behaviourType = behaviourStruct.behaviourType
         self.frequencyOperator = behaviourStruct.frequencyOperator
         self.frequencyMin = behaviourStruct.frequencyMin
         self.frequencyMax = behaviourStruct.frequencyMax
@@ -84,8 +89,18 @@ extension Definition {
     @NSManaged public var revision: Int16
     @NSManaged public var uuid: UUID
     
+    @NSManaged private var typeRaw: String
     @NSManaged private var statusRaw: String
     @NSManaged private var behaviourOperatorsRaw: NSArray
+    
+    public var type: EDefinitionType {
+        get {
+            return EDefinitionType(rawValue: self.typeRaw) ?? .STANDART
+        }
+        set {
+            self.typeRaw = String(newValue.rawValue)
+        }
+    }
     
     public var status: EDefinitionStatus {
         get {
@@ -96,10 +111,10 @@ extension Definition {
         }
     }
     
-    public var behaviourOperators: [EBehaviourType] {
+    public var behaviourOperators: [EBehaviourOperator] {
         get {
             return behaviourOperatorsRaw.map {val in
-                EBehaviourType(rawValue: val as! String)!
+                EBehaviourOperator(rawValue: val as! String)!
             }
         }
         set {
@@ -112,6 +127,7 @@ extension Definition {
     public func setData(definitionStruct: DefinitionStruct) {
         defId = definitionStruct.defId
         revision = Int16(definitionStruct.revision)
+        type = definitionStruct.type ?? .STANDART
         status = definitionStruct.status
         code = definitionStruct.code
         uuid = UUID(uuidString: definitionStruct.uuid)!
@@ -268,6 +284,18 @@ final class Storage {
             try managedContext.execute(NSBatchDeleteRequest(fetchRequest: request))
         } catch {
             throw EDMPError.removePartialEvents
+        }
+    }
+    
+    public func removeOneTimeEvents() throws {
+        do {
+            let oneTimeDefinitionIds = self.getDefinitions()
+                .filter({ $0.type == EDefinitionType.CURRENT_PAGE })
+                .map({ return $0.defId })
+            
+            try self.removeEventsByDefinitions(oneTimeDefinitionIds)
+        } catch {
+            throw EDMPError.removeOneTimeEvents
         }
     }
     

@@ -8,6 +8,7 @@
         <attribute name="lastModifiedDate" optional="YES" attributeType="String"/>
         <attribute name="revision" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="statusRaw" optional="YES" attributeType="String" valueTransformerName="DefinitionStatusValueTransformer" customClassName="IdxDmpSdk.EDefinitionStatus"/>
+        <attribute name="typeRaw" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
