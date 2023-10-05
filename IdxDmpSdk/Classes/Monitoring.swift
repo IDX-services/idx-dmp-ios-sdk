@@ -1,22 +1,34 @@
 enum ELogLevel: Int {
     case None = 0,
     Errors,
+    Warnings,
     All
 }
 
-final class Logger {
+final class Monitoring {
     private let logLevel: ELogLevel
+    private var logHistory: [String] = []
 
-    init (logLevel: ELogLevel = ELogLevel.All) {
+    init (_ logLevel: ELogLevel = ELogLevel.None) {
         self.logLevel = logLevel
     }
     
     private func printMessage(_ message: String) {
+        logHistory.append(message)
+
         NSLog("[DMP Log]: \(message)")
     }
 
     func log(_ message: String) {
         if (self.logLevel.rawValue < ELogLevel.All.rawValue) {
+            return
+        }
+        
+        self.printMessage(message)
+    }
+    
+    func warning(_ message: String) {
+        if (self.logLevel.rawValue < ELogLevel.Warnings.rawValue) {
             return
         }
         
@@ -57,6 +69,30 @@ final class Logger {
             self.printMessage("User data parse error")
         default:
             self.printMessage("Unknown exception, error: \(errorInstance)")
+        }
+    }
+    
+    func complete(_ withError: (any Error)? = nil) {
+        if let error = withError {
+            self.error(error)
+        }
+
+        if (self.logHistory.count < 1) {
+            return
+        }
+
+        let requestBody = MonitoringRequestStruct(
+            loggerLog: self.logHistory
+        )
+        
+        do {
+            try Api.post(
+                url: Config.Api.monitoringUrl,
+                body: requestBody
+            )
+            self.logHistory = []
+        } catch {
+            self.error(error)
         }
     }
 }

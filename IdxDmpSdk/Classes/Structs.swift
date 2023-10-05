@@ -96,3 +96,7 @@ struct StatisticEventRequestStruct: Encodable {
     let audienceCode: String
     let actualAudienceCodes: [String]
 }
+
+struct MonitoringRequestStruct: Encodable {
+    let loggerLog: [String]
+}

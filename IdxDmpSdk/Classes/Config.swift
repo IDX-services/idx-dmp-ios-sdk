@@ -3,6 +3,7 @@ struct Config {
         static let baseUrl = "https://event.dxmdp.com/rest/api/v1"
         static let stateUrl = "\(Config.Api.baseUrl)/state"
         static let eventUrl = "\(Config.Api.baseUrl)/events"
+        static let monitoringUrl = "\(Config.Api.baseUrl)/report-error"
         static let cookieIsEnabled = false
     }
     struct Date {

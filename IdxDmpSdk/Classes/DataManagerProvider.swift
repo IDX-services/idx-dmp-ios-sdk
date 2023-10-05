@@ -1,7 +1,7 @@
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
-    let logger = Logger()
+    let monitroing = Monitoring(.Errors)
     let databaseStorage: Storage?
 
     var initIsComplete = false
@@ -11,6 +11,7 @@ public final class DataManagerProvider {
     public init(providerId: String, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         self.providerId = providerId
         
+        self.monitroing.log("Init with provider id: \(providerId)")
         do {
             if #available(iOS 12.0, *) {
                 databaseStorage = try Storage()
@@ -20,7 +21,7 @@ public final class DataManagerProvider {
             self.getState(completionHandler: completionHandler)
         } catch {
             databaseStorage = nil
-            self.logger.error(EDMPError.databaseConnectFailed)
+            self.monitroing.complete(EDMPError.databaseConnectFailed)
         }
     }
     
@@ -60,12 +61,12 @@ public final class DataManagerProvider {
         decoder.dateDecodingStrategy = .formatted(dateFormatter)
         
         guard let userData = data else {
-            logger.error(EDMPError.userDataIsEmpty)
+            monitroing.error(EDMPError.userDataIsEmpty)
             return
         }
         
         guard let userState: UserStateStruct = try? decoder.decode(UserStateStruct.self, from: userData) else {
-            logger.error(EDMPError.userDataParseError)
+            monitroing.error(EDMPError.userDataParseError)
             return
         }
         
@@ -73,7 +74,7 @@ public final class DataManagerProvider {
         self.setTimestamp(ts: String(userState.lastModifiedTimestamp))
         
         guard let databaseConnection = self.databaseStorage else {
-            logger.error(EDMPError.databaseConnectFailed)
+            monitroing.error(EDMPError.databaseConnectFailed)
             return
         }
         
@@ -86,31 +87,33 @@ public final class DataManagerProvider {
             try databaseConnection.removeDefinitions(userState.deletedDefinitionIds)
             try databaseConnection.removeEventsByDefinitions(userState.deletedDefinitionIds)
         } catch {
-            logger.error(error)
+            monitroing.complete(error)
         }
     }
     
     private func removeOneTimeEvents() {
         do {
             guard let databaseConnection = self.databaseStorage else {
-                logger.error(EDMPError.databaseConnectFailed)
+                monitroing.error(EDMPError.databaseConnectFailed)
                 return
             }
 
             try databaseConnection.removeOneTimeEvents()
         } catch {
-            logger.error(error)
+            monitroing.complete(error)
         }
     }
     
     private func calculateAudiences() {
         guard let events = self.databaseStorage?.getEvents(),
               let definitions = self.databaseStorage?.getDefinitions() else {
-            logger.error(EDMPError.databaseConnectFailed)
+            monitroing.error(EDMPError.databaseConnectFailed)
             return
         }
         
         let matchedDefinitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
+        
+        self.monitroing.log("matchedDefinitionIds: \(matchedDefinitionIds)")
         
         self.sendStatisticEvent(newDefinitionsIds: matchedDefinitionIds, definitions: definitions)
         
@@ -146,18 +149,20 @@ public final class DataManagerProvider {
             }
         } catch {
             completionHandler(error)
-            logger.error(error)
+            monitroing.complete(error)
         }
     }
     
     private func sendStatisticEvent(newDefinitionsIds: [String], definitions: [Definition]) {
         guard let userId = getUserId() else {
-            return logger.error(EDMPError.userIdIsEmpty)
+            return monitroing.error(EDMPError.userIdIsEmpty)
         }
         
         let oldDefinitionIds = self.getPrevDefinitionIds()
         
         let enterAndExitDefinitionIds = getEnterAndExitDefinitionIds(oldDefinitionIds: oldDefinitionIds, newDefinitionIds: newDefinitionsIds, definitions: definitions)
+
+        self.monitroing.log("enterDefinitionIds: \(enterAndExitDefinitionIds.enterIds), exitDefinitionIds: \(enterAndExitDefinitionIds.exitIds)")
 
         enterAndExitDefinitionIds.enterIds.forEach { id in
             let eventBody = StatisticEventRequestStruct(
@@ -175,7 +180,7 @@ public final class DataManagerProvider {
                     body: eventBody
                 )
             } catch {
-                logger.error(error)
+                monitroing.error(error)
             }
         }
         
@@ -195,7 +200,7 @@ public final class DataManagerProvider {
                     body: eventBody
                 )
             } catch {
-                logger.error(error)
+                monitroing.error(error)
             }
         }
     }
@@ -207,7 +212,7 @@ public final class DataManagerProvider {
         }
 
         guard let userId = getUserId() else {
-            return logger.error(EDMPError.userIdIsEmpty)
+            return monitroing.error(EDMPError.userIdIsEmpty)
         }
 
         let eventBody = EventRequestStruct(
@@ -226,10 +231,11 @@ public final class DataManagerProvider {
                 self.updateUserState(data: data)
                 self.calculateAudiences()
                 completionHandler(error)
+                self.monitroing.complete()
             }
         } catch {
             completionHandler(error)
-            logger.error(error)
+            monitroing.complete(error)
         }
     }
     
@@ -240,7 +246,7 @@ public final class DataManagerProvider {
             self.definitionIds = []
             try self.databaseStorage?.removeStorageData()
         } catch {
-            logger.error(error)
+            monitroing.complete(error)
         }
     }
 }
