@@ -65,5 +65,24 @@ enum EDMPError: Error {
     case userIdIsEmpty
     case userDataIsEmpty
     case userDataParseError
+    case configDataIsEmpty
+    case configDataParseError
+    case configExpressionError
     case requestError
+}
+
+enum EDataCollectionConfigItemFieldType: String, Decodable {
+    case STRING, DOUBLE, LONG, ARRAY_OF_STRING
+}
+
+enum EFieldExtractionConfigType: String, Decodable {
+    case URL_REGEX, GLOBAL_VARIABLE, META_NAME, META_PROPERTY, JAVASCRIPT
+}
+
+enum EMonitoringVerboseMode: String, Decodable {
+    case ALL, WARNINGS, ERRORS
+}
+
+enum EProviderExclusionType: String, Decodable {
+    case URL_CONTAINS, URL_EXACTLY_MATCH, CATEGORY_EQUALS
 }

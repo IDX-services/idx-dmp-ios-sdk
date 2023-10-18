@@ -67,6 +67,12 @@ final class Monitoring {
             self.printMessage("User data is empty")
         case EDMPError.userDataParseError:
             self.printMessage("User data parse error")
+        case EDMPError.configDataIsEmpty:
+            self.printMessage("Config data is empty")
+        case EDMPError.configDataParseError:
+            self.printMessage("Config data parse error")
+        case EDMPError.configExpressionError:
+            self.printMessage("Config expression error")
         default:
             self.printMessage("Unknown exception, error: \(errorInstance)")
         }

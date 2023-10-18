@@ -124,3 +124,43 @@ struct StatisticEventRequestStruct: Encodable {
 struct MonitoringRequestStruct: Encodable {
     let loggerLog: [String]
 }
+
+struct DataCollectionConfigItemFieldStruct: Decodable {
+    let type: EDataCollectionConfigItemFieldType
+    let path: String
+    let uuid: String?
+    let name: String?
+}
+
+struct FieldExtractionConfigStruct: Decodable {
+    let uuid: String
+    let type: EFieldExtractionConfigType
+    let field: DataCollectionConfigItemFieldStruct
+    let expression: String
+}
+
+struct MonitoringConfigStruct: Decodable {
+    let uuid: String
+    let enabled: Bool
+    let verboseMode: EMonitoringVerboseMode
+    let includeDatabase: Bool
+    let includeLoggerState: Bool
+    let includeLocalStorage: Bool
+    let sampling: Int?
+    let observedUserId: String?
+}
+
+struct ProviderExclusionStruct: Decodable {
+    let uuid: String
+    let expression: String
+    let type: EProviderExclusionType
+}
+
+struct ProviderConfigStruct: Decodable {
+    let uuid: String
+    let fieldExtractions: [FieldExtractionConfigStruct]
+    let providerExclusions: [ProviderExclusionStruct]
+    let isDataCollectionEnabled: Bool
+    let isDFPActivationEnabled: Bool
+    let providerMonitoring: MonitoringConfigStruct
+}
