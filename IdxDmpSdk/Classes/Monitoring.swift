@@ -1,80 +1,98 @@
-enum ELogLevel: Int {
+private enum ELogLevel: Int {
     case None = 0,
-    Errors,
+    All,
     Warnings,
-    All
+    Errors
 }
 
 final class Monitoring {
-    private let logLevel: ELogLevel
+    private var currentLogLevel: ELogLevel = .None
+    private var monitoringConfig: MonitoringConfigStruct?
     private var logHistory: [String] = []
-
-    init (_ logLevel: ELogLevel = ELogLevel.None) {
-        self.logLevel = logLevel
+    private var userId: String?
+    
+    init () {
+        return
     }
     
-    private func printMessage(_ message: String) {
+    private func getLogLevelByVerboseMode() -> ELogLevel {
+        switch monitoringConfig?.verboseMode {
+        case .ALL:
+            return .All
+        case .WARNINGS:
+            return .Warnings
+        case.ERRORS:
+            return .Errors
+        default:
+            return .None
+        }
+    }
+    
+    private func setCurrentLevel (_ level: ELogLevel) {
+        if (currentLogLevel.rawValue < level.rawValue) {
+            currentLogLevel = level
+        }
+    }
+    
+    private func printMessage(_ message: String, _ level: ELogLevel) {
+        setCurrentLevel(level)
         logHistory.append(message)
 
         NSLog("[DMP Log]: \(message)")
     }
+    
+    func setMonitoringConfig (_ monitoringConfig: MonitoringConfigStruct) {
+        self.monitoringConfig = monitoringConfig
+    }
+    
+    func setUserId (_ userId: String) {
+        self.userId = userId
+    }
 
     func log(_ message: String) {
-        if (self.logLevel.rawValue < ELogLevel.All.rawValue) {
-            return
-        }
-        
-        self.printMessage(message)
+        self.printMessage(message, ELogLevel.All)
     }
     
     func warning(_ message: String) {
-        if (self.logLevel.rawValue < ELogLevel.Warnings.rawValue) {
-            return
-        }
-        
-        self.printMessage(message)
+        self.printMessage(message, ELogLevel.Warnings)
     }
     
     func error(_ errorInstance: any Error) {
-        if (self.logLevel.rawValue < ELogLevel.Errors.rawValue) {
-            return
-        }
-        
         switch errorInstance {
         case EDMPError.cannotCreateUrl(let from):
-            self.printMessage("Cannot create url form \(from)")
+            self.printMessage("Cannot create url form \(from)", ELogLevel.Errors)
         case EDMPError.urlIsNil:
-            self.printMessage("Url is nil")
+            self.printMessage("Url is nil", ELogLevel.Errors)
         case EDMPError.responseIsEmpty:
-            self.printMessage("Api response is empty")
+            self.printMessage("Api response is empty", ELogLevel.Errors)
         case EDMPError.setEventsFailed:
-            self.printMessage("Set events failed")
+            self.printMessage("Set events failed", ELogLevel.Errors)
         case EDMPError.mergeEventsFailed:
-            self.printMessage("Merge events failed")
+            self.printMessage("Merge events failed", ELogLevel.Errors)
         case EDMPError.setDefinitionsFailed:
-            self.printMessage("Set definitions failed")
+            self.printMessage("Set definitions failed", ELogLevel.Errors)
         case EDMPError.removeAllEvents:
-            self.printMessage("Remove all events failed")
+            self.printMessage("Remove all events failed", ELogLevel.Errors)
         case EDMPError.removeAllDefinitions:
-            self.printMessage("Remove all definitions failed")
+            self.printMessage("Remove all definitions failed", ELogLevel.Errors)
         case EDMPError.removeAllStorage:
-            self.printMessage("Remove all storage failed")
+            self.printMessage("Remove all storage failed", ELogLevel.Errors)
         case EDMPError.databaseConnectFailed:
-            self.printMessage("Database is not available")
+            self.printMessage("Database is not available", ELogLevel.Errors)
         case EDMPError.userIdIsEmpty:
-            self.printMessage("User id is empty")
+            self.printMessage("User id is empty", ELogLevel.Errors)
         case EDMPError.userDataIsEmpty:
-            self.printMessage("User data is empty")
+            self.printMessage("User data is empty", ELogLevel.Errors)
         case EDMPError.userDataParseError:
-            self.printMessage("User data parse error")
+            self.printMessage("User data parse error", ELogLevel.Errors)
         case EDMPError.configDataIsEmpty:
-            self.printMessage("Config data is empty")
+            self.printMessage("Config data is empty", ELogLevel.Errors)
         case EDMPError.configDataParseError:
-            self.printMessage("Config data parse error")
+            self.printMessage("Config data parse error", ELogLevel.Errors)
         case EDMPError.configExpressionError:
-            self.printMessage("Config expression error")
+            self.printMessage("Config expression error", ELogLevel.Errors)
         default:
-            self.printMessage("Unknown exception, error: \(errorInstance)")
+            self.printMessage("Unknown exception, error: \(errorInstance)", ELogLevel.Errors)
         }
     }
     
@@ -82,8 +100,24 @@ final class Monitoring {
         if let error = withError {
             self.error(error)
         }
-
-        if (self.logHistory.count < 1) {
+        
+        guard let monitoringConfig = self.monitoringConfig else {
+            return
+        }
+        
+        if (!monitoringConfig.enabled) {
+            return
+        }
+        
+        if (
+            monitoringConfig.observedUserId != nil &&
+            !monitoringConfig.observedUserId!.isEmpty &&
+            monitoringConfig.observedUserId != userId
+        ) {
+            return
+        }
+        
+        if (getLogLevelByVerboseMode().rawValue > currentLogLevel.rawValue) {
             return
         }
 

@@ -1,7 +1,7 @@
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
-    let monitoring = Monitoring(.Errors)
+    let monitoring = Monitoring()
     let databaseStorage: Storage?
 
     var initIsComplete = false
@@ -28,6 +28,7 @@ public final class DataManagerProvider {
     
     private func setUserId(userId: String) {
         localStorage.set(userId, forKey: "userId")
+        monitoring.setUserId(userId)
     }
     
     public func getUserId() -> String? {
@@ -168,6 +169,8 @@ public final class DataManagerProvider {
                 }
                 
                 self.providerConfig = providerConfig
+                
+                self.monitoring.setMonitoringConfig(providerConfig.providerMonitoring)
 
                 if (!self.initIsComplete) {
                     self.initIsComplete = true
