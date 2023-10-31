@@ -20,6 +20,7 @@ public final class DataManagerProvider {
                 throw EDMPError.databaseConnectFailed
             }
             self.getState(completionHandler: completionHandler)
+            self.definitionIds = self.getPrevDefinitionIds()
         } catch {
             databaseStorage = nil
             self.monitoring.complete(EDMPError.databaseConnectFailed)
@@ -209,9 +210,7 @@ public final class DataManagerProvider {
             return monitoring.error(EDMPError.userIdIsEmpty)
         }
         
-        let oldDefinitionIds = self.getPrevDefinitionIds()
-        
-        let enterAndExitDefinitionIds = getEnterAndExitDefinitionIds(oldDefinitionIds: oldDefinitionIds, newDefinitionIds: newDefinitionsIds, definitions: definitions)
+        let enterAndExitDefinitionIds = getEnterAndExitDefinitionIds(oldDefinitionIds: definitionIds, newDefinitionIds: newDefinitionsIds, definitions: definitions)
 
         self.monitoring.log("enterDefinitionIds: \(enterAndExitDefinitionIds.enterIds), exitDefinitionIds: \(enterAndExitDefinitionIds.exitIds)")
 
@@ -221,7 +220,7 @@ public final class DataManagerProvider {
                 userId: userId,
                 providerId: self.providerId,
                 audienceCode: id,
-                actualAudienceCodes: oldDefinitionIds
+                actualAudienceCodes: definitionIds
             )
             
             do {
@@ -241,7 +240,7 @@ public final class DataManagerProvider {
                 userId: userId,
                 providerId: self.providerId,
                 audienceCode: id,
-                actualAudienceCodes: oldDefinitionIds
+                actualAudienceCodes: definitionIds
             )
             
             do {
@@ -259,16 +258,18 @@ public final class DataManagerProvider {
     public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         if (!self.initIsComplete) {
             self.eventRequestQueue.append(EventQueueItem(properties: properties, callback: completionHandler))
-            return
+            return completionHandler(nil)
         }
         
         if (self.isIgnoreEvents(properties: properties)) {
             monitoring.warning("Event sending is disabled: \(properties)")
-            return
+            return completionHandler(nil)
         }
 
         guard let userId = getUserId() else {
-            return monitoring.error(EDMPError.userIdIsEmpty)
+            monitoring.error(EDMPError.userIdIsEmpty)
+            // TODO: set error to handler
+            return completionHandler(nil)
         }
 
         let eventBody = EventRequestStruct(
