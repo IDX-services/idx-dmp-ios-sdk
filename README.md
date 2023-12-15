@@ -30,7 +30,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.dmp = DataManagerProvider(providerId: providerId) {_ in
+        self.dmp = DataManagerProvider(providerId: providerId, monitoringLabel: "My app name") {_ in
           // Success callback
         }
     }
