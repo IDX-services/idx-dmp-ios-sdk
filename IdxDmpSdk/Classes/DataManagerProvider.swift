@@ -1,7 +1,7 @@
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
-    let monitoring = Monitoring()
+    let monitoring: Monitoring
     let databaseStorage: Storage?
 
     var initIsComplete = false
@@ -9,8 +9,9 @@ public final class DataManagerProvider {
     var eventRequestQueue: [EventQueueItem] = []
     var definitionIds: [String] = []
     
-    public init(providerId: String, completionHandler: @escaping (Any?) -> Void = {_ in}) {
+    public init(providerId: String, monitoringLabel: String?, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         self.providerId = providerId
+        self.monitoring = Monitoring(label: monitoringLabel)
         
         self.monitoring.log("Init with provider id: \(providerId)")
         do {

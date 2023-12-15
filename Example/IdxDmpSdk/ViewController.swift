@@ -45,7 +45,7 @@ class ViewController: UIViewController {
             return
         }
 
-        self.dmp = DataManagerProvider(providerId: providerId) {_ in
+        self.dmp = DataManagerProvider(providerId: providerId, monitoringLabel: "Example app") {_ in
 //            self.showToast("Provider id has been init")
         }
         

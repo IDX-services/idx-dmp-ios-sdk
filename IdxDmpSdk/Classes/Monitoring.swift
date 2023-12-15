@@ -10,9 +10,11 @@ final class Monitoring {
     private var monitoringConfig: MonitoringConfigStruct?
     private var logHistory: [String] = []
     private var userId: String?
+    private var label: String?
+    private var buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
     
-    init () {
-        return
+    init (label: String?) {
+        self.label = label
     }
     
     private func getLogLevelByVerboseMode() -> ELogLevel {
@@ -36,9 +38,10 @@ final class Monitoring {
     
     private func printMessage(_ message: String, _ level: ELogLevel) {
         setCurrentLevel(level)
-        logHistory.append(message)
+        var formattedMessage = "[DMP monitoring, platform: iOS, version: \(buildNumber)" + (label != nil ? ", label: \(label as! String)" : "") + "]: \(message)"
 
-        NSLog("[DMP Log]: \(message)")
+        logHistory.append(formattedMessage)
+        NSLog(formattedMessage)
     }
     
     func setMonitoringConfig (_ monitoringConfig: MonitoringConfigStruct) {
