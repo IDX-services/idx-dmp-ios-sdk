@@ -11,7 +11,7 @@ final class Monitoring {
     private var logHistory: [String] = []
     private var userId: String?
     private var label: String?
-    private var buildNumber: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String
+    private var buildNumber: String = Bundle(identifier: "org.cocoapods.IdxDmpSdk")?.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
     
     init (label: String?) {
         self.label = label
@@ -38,7 +38,7 @@ final class Monitoring {
     
     private func printMessage(_ message: String, _ level: ELogLevel) {
         setCurrentLevel(level)
-        var formattedMessage = "[DMP monitoring, platform: iOS, version: \(buildNumber)" + (label != nil ? ", label: \(label as! String)" : "") + "]: \(message)"
+        let formattedMessage = "[DMP monitoring, platform: iOS, version: \(buildNumber)" + (label != nil ? ", label: \(label as! String)" : "") + "]: \(message)"
 
         logHistory.append(formattedMessage)
         NSLog(formattedMessage)
