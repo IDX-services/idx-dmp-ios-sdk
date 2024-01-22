@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21754" systemVersion="22F66" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Definition" representedClassName="Definition" syncable="YES">
+        <attribute name="behaviourOperatorsRaw" optional="YES" attributeType="Transformable" valueTransformerName="StorageTransformer" customClassName="NSArray"/>
+        <attribute name="behaviours" optional="YES" attributeType="Transformable" valueTransformerName="StorageTransformer" customClassName="Behaviour"/>
+        <attribute name="code" optional="YES" attributeType="String"/>
+        <attribute name="debugEnabled" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="defId" optional="YES" attributeType="String"/>
+        <attribute name="lastModifiedDate" optional="YES" attributeType="String"/>
+        <attribute name="revision" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="statusRaw" optional="YES" attributeType="String" valueTransformerName="DefinitionStatusValueTransformer" customClassName="IdxDmpSdk.EDefinitionStatus"/>
+        <attribute name="typeRaw" optional="YES" attributeType="String"/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="uuid"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Event" representedClassName="Event" syncable="YES">
+        <attribute name="behaviourCode" optional="YES" attributeType="String"/>
+        <attribute name="computedId" optional="YES" attributeType="String"/>
+        <attribute name="defId" optional="YES" attributeType="String"/>
+        <attribute name="timestamps" optional="YES" attributeType="Transformable" valueTransformerName="StorageTransformer" customClassName="NSArray"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="computedId"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+</model>

@@ -4,9 +4,15 @@ final class Api {
     private static func makeRequest (
         requestUrl: String,
         method: String = "GET",
+        pathParams: [String: String]? = [:],
         queryItems: [String: String?]? = [:]
     ) throws -> URLRequest {
-        guard var urlComponent = URLComponents(string: requestUrl) else {
+        var url = requestUrl
+        pathParams?.forEach {parameter in
+            url = url.replacingOccurrences(of: ":" + parameter.key, with: parameter.value)
+        }
+
+        guard var urlComponent = URLComponents(string: url) else {
             throw EDMPError.cannotCreateUrl(from: requestUrl)
         }
 
@@ -56,26 +62,28 @@ final class Api {
     
     static func get(
         url: String,
+        pathParams: [String: String]? = nil,
         queryItems: [String: String?]? = nil,
-        completionHandler: @escaping (Data?, Error?) -> Void
+        completionHandler: ((Data?, Error?) -> Void)? = { _,_ in }
     ) throws {
-        let request = try makeRequest(requestUrl: url, method: "GET", queryItems: queryItems)
+        let request = try makeRequest(requestUrl: url, method: "GET", pathParams: pathParams, queryItems: queryItems)
 
-        sendRequest(request: request, completionHandler: completionHandler)
+        sendRequest(request: request, completionHandler: completionHandler!)
     }
     
     static func post(
         url: String,
+        pathParams: [String: String]? = nil,
         queryItems: [String: String?]? = nil,
         body: Encodable? = nil,
-        completionHandler: @escaping (Data?, Error?) -> Void
+        completionHandler: ((Data?, Error?) -> Void)? = { _,_ in }
     ) throws {
-        var request = try makeRequest(requestUrl: url, method: "POST", queryItems: queryItems)
+        var request = try makeRequest(requestUrl: url, method: "POST", pathParams: pathParams, queryItems: queryItems)
         
         if let body = body {
             request.httpBody = try JSONEncoder().encode(body)
         }
         
-        sendRequest(request: request, completionHandler: completionHandler)
+        sendRequest(request: request, completionHandler: completionHandler!)
     }
 }

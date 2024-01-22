@@ -4,6 +4,7 @@ struct BehaviourStruct: Decodable {
     let uuid: String
     let code: String
     let ordinalNum: Int
+    let behaviourType: EBehaviourType?
     let frequencyOperator: EFrequencyOperator?
     let frequencyMin: Int?
     let frequencyMax: Int?
@@ -20,10 +21,12 @@ struct DefinitionStruct: Decodable {
     let uuid: String
     let code: String
     let revision: Int
+    let type: EDefinitionType?
     let status: EDefinitionStatus
     let behaviours: [BehaviourStruct]
-    let behaviourOperators: [EBehaviourType]
+    let behaviourOperators: [EBehaviourOperator]
     let lastModifiedDate: String
+    let debugEnabled: Bool?
 }
 
 struct EventStruct: Decodable {
@@ -49,6 +52,7 @@ public struct EventRequestPropertiesStruct: Encodable {
     public let category: String
     public let description: String
     public let tags: [String]
+    public let devicePlatform: String
 
     public init(
         url: String,
@@ -66,6 +70,7 @@ public struct EventRequestPropertiesStruct: Encodable {
         self.category = category
         self.description = description
         self.tags = tags
+        self.devicePlatform = "MOBILE_APP"
     }
 }
 
@@ -79,4 +84,85 @@ public struct EventRequestStruct: Encodable {
 struct EventQueueItem {
     let properties: EventRequestPropertiesStruct
     let callback: (Any?) -> Void
+}
+
+struct EnterAndExitDefinitionIds {
+    let enterIds: [String]
+    let exitIds: [String]
+}
+
+public struct StatisticEventRequestPropertiesStruct: Encodable {
+    public let devicePlatform: String
+
+    public init() {
+        self.devicePlatform = "MOBILE_APP"
+    }
+}
+
+struct StatisticEventRequestStruct: Encodable {
+    let event: EDMPStatisticEvent
+    let userId: String
+    let providerId: String
+    let audienceCode: String
+    let actualAudienceCodes: [String]
+    let properties: StatisticEventRequestPropertiesStruct
+    
+    public init(
+        event: EDMPStatisticEvent,
+        userId: String,
+        providerId: String,
+        audienceCode: String,
+        actualAudienceCodes: [String]
+    ) {
+        self.event = event
+        self.userId = userId
+        self.providerId = providerId
+        self.audienceCode = audienceCode
+        self.actualAudienceCodes = actualAudienceCodes
+        self.properties = StatisticEventRequestPropertiesStruct()
+    }
+}
+
+struct MonitoringRequestStruct: Encodable {
+    let loggerLog: [String]
+}
+
+struct DataCollectionConfigItemFieldStruct: Decodable {
+    let type: EDataCollectionConfigItemFieldType
+    let path: String
+    let uuid: String?
+    let name: String?
+}
+
+struct FieldExtractionConfigStruct: Decodable {
+    let uuid: String
+    let type: EFieldExtractionConfigType
+    let field: DataCollectionConfigItemFieldStruct
+    let expression: String
+}
+
+struct MonitoringConfigStruct: Decodable {
+    let uuid: String
+    let enabled: Bool
+    let verboseMode: EMonitoringVerboseMode
+    let includeDatabase: Bool
+    let includeLoggerState: Bool
+    let includeLocalStorage: Bool
+    let sampling: Int?
+    let observedUserId: String?
+}
+
+struct ProviderExclusionStruct: Decodable {
+    let uuid: String
+    let expression: String
+    let type: EProviderExclusionType
+}
+
+struct ProviderConfigStruct: Decodable {
+    let uuid: String
+    let fieldExtractions: [FieldExtractionConfigStruct]
+    let providerExclusions: [ProviderExclusionStruct]
+    let isDataCollectionEnabled: Bool
+    let isDFPActivationEnabled: Bool
+    let providerMonitoring: MonitoringConfigStruct
 }

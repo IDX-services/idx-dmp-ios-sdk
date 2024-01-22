@@ -45,7 +45,7 @@ class ViewController: UIViewController {
             return
         }
 
-        self.dmp = DataManagerProvider(providerId: providerId) {_ in
+        self.dmp = DataManagerProvider(providerId: providerId, monitoringLabel: "Example app") {_ in
 //            self.showToast("Provider id has been init")
         }
         
@@ -59,7 +59,7 @@ class ViewController: UIViewController {
             tags: textFieldTags.text?.components(separatedBy: ",") ?? []
         )
 
-        self.dmp!.sendEvent(properties: requestProps) { error in
+        self.dmp?.sendEvent(properties: requestProps) { error in
             if (error != nil) {
                 self.dmp!.resetState()
             }
@@ -73,8 +73,8 @@ class ViewController: UIViewController {
                 Category: \(requestProps.category)
                 Desc: \(requestProps.description)
                 Tags: \(requestProps.tags)
-                UserId: \(String(describing: self.dmp!.getUserId()))
-                Timestamp: \(String(describing: self.dmp!.getTimestamp()))
+                UserId: \(self.dmp!.getUserId()?.description ?? "")
+                Timestamp: \(self.dmp!.getTimestamp()?.description ?? "")
                 OS Version: \(UIDevice.current.systemVersion)
                 Device Id: \(String(describing: UIDevice.current.identifierForVendor))
                 Model: \(UIDevice.current.model)
@@ -102,11 +102,29 @@ class ViewController: UIViewController {
 
         bannerView.load(adRequest)
     }
+    
+    @IBAction func handleResetState() {
+        guard let dmp = self.dmp else {
+            self.showToast("DMP is not init!")
+            return
+        }
+        
+        dmp.resetState()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.hideKeyboardWhenTappedAround()
+//
+//        guard let providerId = textFieldProvider.text else {
+//            self.showToast("Provider id is empty!")
+//            return
+//        }
+//
+//        self.dmp = DataManagerProvider(providerId: providerId) {_ in
+//            self.showToast("Provider id has been init")
+//        }
     }
 
     override func didReceiveMemoryWarning() {

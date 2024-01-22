@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		152A6A0AAD5061E6004ECF5A /* Pods_IdxDmpSdk_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 039B62344C75B10CF3531B55 /* Pods_IdxDmpSdk_Example.framework */; };
+		4822EBF6930FB4F8E920D23B /* Pods_IdxDmpSdk_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F25C5A8DDDFFAB4A208AF38C /* Pods_IdxDmpSdk_Tests.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
-		A33472F22C9C58AAD1748241 /* Pods_IdxDmpSdk_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93480365A9F6EBE92EDC4B26 /* Pods_IdxDmpSdk_Tests.framework */; };
+		DC2568D5680A1B4373FAFF87 /* Pods_IdxDmpSdk_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE78CDC9E1453F8CFE94336 /* Pods_IdxDmpSdk_Example.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,7 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		039B62344C75B10CF3531B55 /* Pods_IdxDmpSdk_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IdxDmpSdk_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		00C4FAD2CF2E1DBC6BF04C66 /* Pods-IdxDmpSdk_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Tests.debug.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Tests/Pods-IdxDmpSdk_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* IdxDmpSdk_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IdxDmpSdk_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -39,14 +39,14 @@
 		607FACE51AFB9204008FA782 /* IdxDmpSdk_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IdxDmpSdk_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
-		887F02DECF78EB59C773FC72 /* Pods-IdxDmpSdk_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Example.release.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example.release.xcconfig"; sourceTree = "<group>"; };
-		93480365A9F6EBE92EDC4B26 /* Pods_IdxDmpSdk_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IdxDmpSdk_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9C48C7E4F21DD37CED1A847E /* Pods-IdxDmpSdk_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Tests.release.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Tests/Pods-IdxDmpSdk_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		60805EBE33661CBBC6CA7FB8 /* Pods-IdxDmpSdk_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Example.debug.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		8A635445638BD2EC741EF17F /* Pods-IdxDmpSdk_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Example.release.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example.release.xcconfig"; sourceTree = "<group>"; };
 		9D1942E78A8AD39CF1016832 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
-		A03D08956042A094221D6419 /* Pods-IdxDmpSdk_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Tests.debug.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Tests/Pods-IdxDmpSdk_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		A15A0BA733D2B264A2461690 /* IdxDmpSdk.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = IdxDmpSdk.podspec; path = ../IdxDmpSdk.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		A855E1E5C937A33D613EAC82 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		E55E41F534D412E48B7133EF /* Pods-IdxDmpSdk_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Example.debug.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		ABE78CDC9E1453F8CFE94336 /* Pods_IdxDmpSdk_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IdxDmpSdk_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA912EF5F311C48B33103014 /* Pods-IdxDmpSdk_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdxDmpSdk_Tests.release.xcconfig"; path = "Target Support Files/Pods-IdxDmpSdk_Tests/Pods-IdxDmpSdk_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		F25C5A8DDDFFAB4A208AF38C /* Pods_IdxDmpSdk_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IdxDmpSdk_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,7 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				152A6A0AAD5061E6004ECF5A /* Pods_IdxDmpSdk_Example.framework in Frameworks */,
+				DC2568D5680A1B4373FAFF87 /* Pods_IdxDmpSdk_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,7 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A33472F22C9C58AAD1748241 /* Pods_IdxDmpSdk_Tests.framework in Frameworks */,
+				4822EBF6930FB4F8E920D23B /* Pods_IdxDmpSdk_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,7 +77,7 @@
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
 				A2DE862533DBD39E94482951 /* Pods */,
-				A5FC4D685FCA8DF50B07D427 /* Frameworks */,
+				94C160DE618022E2CBDEAE6C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -139,24 +139,24 @@
 			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
+		94C160DE618022E2CBDEAE6C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ABE78CDC9E1453F8CFE94336 /* Pods_IdxDmpSdk_Example.framework */,
+				F25C5A8DDDFFAB4A208AF38C /* Pods_IdxDmpSdk_Tests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		A2DE862533DBD39E94482951 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				E55E41F534D412E48B7133EF /* Pods-IdxDmpSdk_Example.debug.xcconfig */,
-				887F02DECF78EB59C773FC72 /* Pods-IdxDmpSdk_Example.release.xcconfig */,
-				A03D08956042A094221D6419 /* Pods-IdxDmpSdk_Tests.debug.xcconfig */,
-				9C48C7E4F21DD37CED1A847E /* Pods-IdxDmpSdk_Tests.release.xcconfig */,
+				60805EBE33661CBBC6CA7FB8 /* Pods-IdxDmpSdk_Example.debug.xcconfig */,
+				8A635445638BD2EC741EF17F /* Pods-IdxDmpSdk_Example.release.xcconfig */,
+				00C4FAD2CF2E1DBC6BF04C66 /* Pods-IdxDmpSdk_Tests.debug.xcconfig */,
+				CA912EF5F311C48B33103014 /* Pods-IdxDmpSdk_Tests.release.xcconfig */,
 			);
 			path = Pods;
-			sourceTree = "<group>";
-		};
-		A5FC4D685FCA8DF50B07D427 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				039B62344C75B10CF3531B55 /* Pods_IdxDmpSdk_Example.framework */,
-				93480365A9F6EBE92EDC4B26 /* Pods_IdxDmpSdk_Tests.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -166,11 +166,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "IdxDmpSdk_Example" */;
 			buildPhases = (
-				F19638961CD93B8B39DF385A /* [CP] Check Pods Manifest.lock */,
+				40ED753281B61C8B38282AE8 /* [CP] Check Pods Manifest.lock */,
 				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
-				7916725D0C9716CEBDB56FCA /* [CP] Embed Pods Frameworks */,
+				A7D06D974861D39F6A523C6F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -185,7 +185,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "IdxDmpSdk_Tests" */;
 			buildPhases = (
-				7E605CAEE0294666110B6F06 /* [CP] Check Pods Manifest.lock */,
+				759A1691FE06E4FCC866383F /* [CP] Check Pods Manifest.lock */,
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
@@ -265,35 +265,29 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		7916725D0C9716CEBDB56FCA /* [CP] Embed Pods Frameworks */ = {
+		40ED753281B61C8B38282AE8 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
-				"${BUILT_PRODUCTS_DIR}/IdxDmpSdk/IdxDmpSdk.framework",
-				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
-				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
-				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			inputFileListPaths = (
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IdxDmpSdk.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+				"$(DERIVED_FILE_DIR)/Pods-IdxDmpSdk_Example-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		7E605CAEE0294666110B6F06 /* [CP] Check Pods Manifest.lock */ = {
+		759A1691FE06E4FCC866383F /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -315,26 +309,28 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F19638961CD93B8B39DF385A /* [CP] Check Pods Manifest.lock */ = {
+		A7D06D974861D39F6A523C6F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
+				"${PODS_ROOT}/Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/IdxDmpSdk/IdxDmpSdk.framework",
+				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-IdxDmpSdk_Example-checkManifestLockResult.txt",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IdxDmpSdk.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-IdxDmpSdk_Example/Pods-IdxDmpSdk_Example-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -437,6 +433,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -482,53 +479,54 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		607FACF01AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E55E41F534D412E48B7133EF /* Pods-IdxDmpSdk_Example.debug.xcconfig */;
+			baseConfigurationReference = 60805EBE33661CBBC6CA7FB8 /* Pods-IdxDmpSdk_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = DQ4MSB6CFW;
 				INFOPLIST_FILE = IdxDmpSdk/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "IDX SDK Example";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 2.0.1;
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		607FACF11AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 887F02DECF78EB59C773FC72 /* Pods-IdxDmpSdk_Example.release.xcconfig */;
+			baseConfigurationReference = 8A635445638BD2EC741EF17F /* Pods-IdxDmpSdk_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = DQ4MSB6CFW;
 				INFOPLIST_FILE = IdxDmpSdk/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "IDX SDK Example";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 2.0.1;
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
 		607FACF31AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A03D08956042A094221D6419 /* Pods-IdxDmpSdk_Tests.debug.xcconfig */;
+			baseConfigurationReference = 00C4FAD2CF2E1DBC6BF04C66 /* Pods-IdxDmpSdk_Tests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -555,7 +553,7 @@
 		};
 		607FACF41AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9C48C7E4F21DD37CED1A847E /* Pods-IdxDmpSdk_Tests.release.xcconfig */;
+			baseConfigurationReference = CA912EF5F311C48B33103014 /* Pods-IdxDmpSdk_Tests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;

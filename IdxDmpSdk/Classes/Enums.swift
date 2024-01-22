@@ -1,14 +1,20 @@
-import RealmSwift
-
 enum EDMPEvent: String, Encodable {
     case PAGE_VIEW
 }
 
-enum EDefinitionStatus: String, Decodable, PersistableEnum {
+enum EDMPStatisticEvent: String, Encodable {
+    case AUDIENCE_ENTER, AUDIENCE_EXIT
+}
+
+enum EDefinitionType: String, Decodable {
+    case STANDARD, CURRENT_PAGE
+}
+
+enum EDefinitionStatus: String, Decodable {
     case INDEXING, ACTIVATED
 }
 
-enum EFrequencyOperator: String, Decodable, PersistableEnum {
+enum EFrequencyOperator: String, Decodable {
     case EXACTLY,
     BETWEEN,
     AT_MOST,
@@ -16,23 +22,26 @@ enum EFrequencyOperator: String, Decodable, PersistableEnum {
     NOT_DEFINED
 }
 
-enum EDateTimeUnit: String, Decodable, PersistableEnum {
+enum EDateTimeUnit: String, Decodable {
     case HOURS,
     DAYS,
     WEEKS,
     MONTHS
 }
 
-enum EDurationOperator: String, Decodable, PersistableEnum {
+enum EDurationOperator: String, Decodable {
     case ALL,
     LAST,
     AFTER,
     BEFORE,
-    BETWEEN,
-    CURRENT_PAGE
+    BETWEEN
 }
 
-enum EBehaviourType: String, Decodable, PersistableEnum {
+enum EBehaviourType: String, Decodable {
+    case MAIN, CURRENT_PAGE
+}
+
+enum EBehaviourOperator: String, Decodable {
     case OR, AND
 }
 
@@ -50,9 +59,30 @@ enum EDMPError: Error {
     case removeAllEvents
     case removeAllDefinitions
     case removeAllStorage
+    case removeOneTimeEvents
+    case removePartialEvents
     case databaseConnectFailed
     case userIdIsEmpty
     case userDataIsEmpty
     case userDataParseError
+    case configDataIsEmpty
+    case configDataParseError
+    case configExpressionError
     case requestError
+}
+
+enum EDataCollectionConfigItemFieldType: String, Decodable {
+    case STRING, DOUBLE, LONG, ARRAY_OF_STRING
+}
+
+enum EFieldExtractionConfigType: String, Decodable {
+    case URL_REGEX, GLOBAL_VARIABLE, META_NAME, META_PROPERTY, JAVASCRIPT
+}
+
+enum EMonitoringVerboseMode: String, Decodable {
+    case ALL, WARNINGS, ERRORS
+}
+
+enum EProviderExclusionType: String, Decodable {
+    case URL_CONTAINS, URL_EXACTLY_MATCH, CATEGORY_EQUALS
 }

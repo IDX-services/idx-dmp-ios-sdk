@@ -3,27 +3,36 @@ import Foundation
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
-    let logger = Logger()
+    let monitoring: Monitoring
     let databaseStorage: Storage?
 
     var initIsComplete = false
+    var providerConfig: ProviderConfigStruct?
     var eventRequestQueue: [EventQueueItem] = []
     var definitionIds: [String] = []
     
-    public init(providerId: String, completionHandler: @escaping (Any?) -> Void = {_ in}) {
+    public init(providerId: String, monitoringLabel: String?, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         self.providerId = providerId
+        self.monitoring = Monitoring(label: monitoringLabel)
         
+        self.monitoring.log("Init with provider id: \(providerId)")
         do {
-            databaseStorage = try Storage()
+            if #available(iOS 12.0, *) {
+                databaseStorage = try Storage()
+            } else {
+                throw EDMPError.databaseConnectFailed
+            }
             self.getState(completionHandler: completionHandler)
+            self.definitionIds = self.getPrevDefinitionIds()
         } catch {
             databaseStorage = nil
-            self.logger.error(EDMPError.databaseConnectFailed)
+            self.monitoring.complete(EDMPError.databaseConnectFailed)
         }
     }
     
     private func setUserId(userId: String) {
         localStorage.set(userId, forKey: "userId")
+        monitoring.setUserId(userId)
     }
     
     public func getUserId() -> String? {
@@ -38,6 +47,14 @@ public final class DataManagerProvider {
         return localStorage.string(forKey: "ts")
     }
     
+    private func setPrevDefinitionIds(_ definitionIds: [String]) {
+        localStorage.set(definitionIds, forKey: "prevDefinitionids")
+    }
+    
+    private func getPrevDefinitionIds() -> [String] {
+        return localStorage.stringArray(forKey: "prevDefinitionids") ?? []
+    }
+    
     public func getProviderId() -> String {
         return providerId
     }
@@ -50,12 +67,12 @@ public final class DataManagerProvider {
         decoder.dateDecodingStrategy = .formatted(dateFormatter)
         
         guard let userData = data else {
-            logger.error(EDMPError.userDataIsEmpty)
+            monitoring.error(EDMPError.userDataIsEmpty)
             return
         }
         
         guard let userState: UserStateStruct = try? decoder.decode(UserStateStruct.self, from: userData) else {
-            logger.error(EDMPError.userDataParseError)
+            monitoring.error(EDMPError.userDataParseError)
             return
         }
         
@@ -63,7 +80,7 @@ public final class DataManagerProvider {
         self.setTimestamp(ts: String(userState.lastModifiedTimestamp))
         
         guard let databaseConnection = self.databaseStorage else {
-            logger.error(EDMPError.databaseConnectFailed)
+            monitoring.error(EDMPError.databaseConnectFailed)
             return
         }
         
@@ -73,33 +90,92 @@ public final class DataManagerProvider {
             }
             try databaseConnection.setDefinitions(definitions: userState.definitions)
             try databaseConnection.mergeEvents(newEvents: userState.events)
+            try databaseConnection.removeDefinitions(userState.deletedDefinitionIds)
+            try databaseConnection.removeEventsByDefinitions(userState.deletedDefinitionIds)
         } catch {
-            logger.error(error)
+            monitoring.complete(error)
+        }
+    }
+    
+    private func removeOneTimeEvents() {
+        do {
+            guard let databaseConnection = self.databaseStorage else {
+                monitoring.error(EDMPError.databaseConnectFailed)
+                return
+            }
+
+            try databaseConnection.removeOneTimeEvents()
+        } catch {
+            monitoring.complete(error)
         }
     }
     
     private func calculateAudiences() {
         guard let events = self.databaseStorage?.getEvents(),
               let definitions = self.databaseStorage?.getDefinitions() else {
-            logger.error(EDMPError.databaseConnectFailed)
+            monitoring.error(EDMPError.databaseConnectFailed)
             return
         }
         
-        self.definitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
+        let matchedDefinitionIds = matchDefinitions(events: Array(events), definitions: Array(definitions))
+        
+        self.monitoring.log("matchedDefinitionIds: \(matchedDefinitionIds)")
+        
+        self.sendStatisticEvent(newDefinitionsIds: matchedDefinitionIds, definitions: definitions)
+        
+        self.definitionIds = matchedDefinitionIds
+        self.setPrevDefinitionIds(matchedDefinitionIds)
+        
+        self.removeOneTimeEvents()
     }
     
     public func getDefinitionIds() -> String {
         return definitionIds.joined(separator: ",")
     }
     
-    private func getState(completionHandler: @escaping (Any?) -> Void = {_ in }) {
+    private func isIgnoreEvents(properties: EventRequestPropertiesStruct) -> Bool {
+        do {
+            return try self.providerConfig?.providerExclusions.first {rule in
+                switch rule.type {
+                case .URL_CONTAINS:
+                    return try NSRegularExpression(pattern: rule.expression).firstMatch(
+                        in: properties.url,
+                        range: NSRange(properties.url.startIndex..., in: properties.url)
+                    ) != nil
+                case .URL_EXACTLY_MATCH:
+                    return properties.url.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == rule.expression.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                case .CATEGORY_EQUALS:
+                    return properties.category.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == rule.expression.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+            } != nil
+        } catch {
+            self.monitoring.error(EDMPError.configExpressionError)
+            return false
+        }
+    }
+    
+    private func getConfig(completionHandler: @escaping (Any?) -> Void = {_ in }) {
         do {
             try Api.get(
-                url: Config.Api.stateUrl,
-                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
+                url: Config.Api.configUrl,
+                pathParams: ["providerId": self.providerId]
             ) {(data, error) in
-                self.updateUserState(data: data)
+                let decoder = JSONDecoder()
                 
+                guard let configData = data else {
+                    self.monitoring.error(EDMPError.configDataIsEmpty)
+                    return
+                }
+
+                guard let providerConfig: ProviderConfigStruct = try? decoder.decode(ProviderConfigStruct.self, from: configData) else {
+                    self.monitoring.error(EDMPError.configDataParseError)
+                    return
+                }
+                
+                self.providerConfig = providerConfig
+                
+                self.monitoring.setMonitoringConfig(providerConfig.providerMonitoring)
+
                 if (!self.initIsComplete) {
                     self.initIsComplete = true
                     self.eventRequestQueue.forEach { eventQueueItem in
@@ -113,19 +189,90 @@ public final class DataManagerProvider {
                 completionHandler(error)
             }
         } catch {
+            monitoring.complete(error)
+        }
+    }
+    
+    private func getState(completionHandler: @escaping (Any?) -> Void = {_ in }) {
+        do {
+            try Api.get(
+                url: Config.Api.stateUrl,
+                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
+            ) {(data, error) in
+                self.updateUserState(data: data)
+                self.getConfig(completionHandler: completionHandler)
+            }
+        } catch {
             completionHandler(error)
-            logger.error(error)
+            monitoring.complete(error)
+        }
+    }
+    
+    private func sendStatisticEvent(newDefinitionsIds: [String], definitions: [Definition]) {
+        guard let userId = getUserId() else {
+            return monitoring.error(EDMPError.userIdIsEmpty)
+        }
+        
+        let enterAndExitDefinitionIds = getEnterAndExitDefinitionIds(oldDefinitionIds: definitionIds, newDefinitionIds: newDefinitionsIds, definitions: definitions)
+
+        self.monitoring.log("enterDefinitionIds: \(enterAndExitDefinitionIds.enterIds), exitDefinitionIds: \(enterAndExitDefinitionIds.exitIds)")
+
+        enterAndExitDefinitionIds.enterIds.forEach { id in
+            let eventBody = StatisticEventRequestStruct(
+                event: EDMPStatisticEvent.AUDIENCE_ENTER,
+                userId: userId,
+                providerId: self.providerId,
+                audienceCode: id,
+                actualAudienceCodes: definitionIds
+            )
+            
+            do {
+                try Api.post(
+                    url: Config.Api.eventUrl,
+                    queryItems: ["ts": getTimestamp(), "dmpid": userId],
+                    body: eventBody
+                )
+            } catch {
+                monitoring.error(error)
+            }
+        }
+        
+        enterAndExitDefinitionIds.exitIds.forEach { id in
+            let eventBody = StatisticEventRequestStruct(
+                event: EDMPStatisticEvent.AUDIENCE_EXIT,
+                userId: userId,
+                providerId: self.providerId,
+                audienceCode: id,
+                actualAudienceCodes: definitionIds
+            )
+            
+            do {
+                try Api.post(
+                    url: Config.Api.eventUrl,
+                    queryItems: ["ts": getTimestamp(), "dmpid": userId],
+                    body: eventBody
+                )
+            } catch {
+                monitoring.error(error)
+            }
         }
     }
     
     public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         if (!self.initIsComplete) {
             self.eventRequestQueue.append(EventQueueItem(properties: properties, callback: completionHandler))
-            return
+            return completionHandler(nil)
+        }
+        
+        if (self.isIgnoreEvents(properties: properties)) {
+            monitoring.warning("Event sending is disabled: \(properties)")
+            return completionHandler(nil)
         }
 
         guard let userId = getUserId() else {
-            return logger.error(EDMPError.userIdIsEmpty)
+            monitoring.error(EDMPError.userIdIsEmpty)
+            // TODO: set error to handler
+            return completionHandler(nil)
         }
 
         let eventBody = EventRequestStruct(
@@ -144,10 +291,11 @@ public final class DataManagerProvider {
                 self.updateUserState(data: data)
                 self.calculateAudiences()
                 completionHandler(error)
+                self.monitoring.complete()
             }
         } catch {
             completionHandler(error)
-            logger.error(error)
+            monitoring.complete(error)
         }
     }
     
@@ -158,7 +306,7 @@ public final class DataManagerProvider {
             self.definitionIds = []
             try self.databaseStorage?.removeStorageData()
         } catch {
-            logger.error(error)
+            monitoring.complete(error)
         }
     }
 }
