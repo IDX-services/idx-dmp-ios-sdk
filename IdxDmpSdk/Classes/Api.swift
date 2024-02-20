@@ -37,20 +37,34 @@ final class Api {
     
     private static func sendRequest(
         request: URLRequest,
+        retryCount: Int = 0,
         completionHandler: @escaping (Data?, Error?) -> Void
     ) {
         URLSession.shared.dataTask(with: request) {(data, response, error) in
+            
+            func handleResponse(_ error: EDMPError) {
+                if (retryCount > 0) {
+                    return sendRequest(
+                        request: request,
+                        retryCount: retryCount - 1,
+                        completionHandler: completionHandler
+                    )
+                }
+                
+                completionHandler(nil, error)
+            }
+
             DispatchQueue.main.async {
                 guard let data = data else {
-                    return completionHandler(nil, EDMPError.responseIsEmpty)
+                    return handleResponse(EDMPError.responseIsEmpty)
                 }
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    return completionHandler(nil, EDMPError.responseIsEmpty)
+                    return handleResponse(EDMPError.responseIsEmpty)
                 }
 
                 if (httpResponse.statusCode != 200) {
-                    return completionHandler(nil, EDMPError.requestError)
+                    return handleResponse(EDMPError.requestError)
                 }
 
                 completionHandler(data, error)
@@ -62,11 +76,12 @@ final class Api {
         url: String,
         pathParams: [String: String]? = nil,
         queryItems: [String: String?]? = nil,
+        retryCount: Int = 0,
         completionHandler: ((Data?, Error?) -> Void)? = { _,_ in }
     ) throws {
         let request = try makeRequest(requestUrl: url, method: "GET", pathParams: pathParams, queryItems: queryItems)
 
-        sendRequest(request: request, completionHandler: completionHandler!)
+        sendRequest(request: request, retryCount: retryCount, completionHandler: completionHandler!)
     }
     
     static func post(
@@ -74,6 +89,7 @@ final class Api {
         pathParams: [String: String]? = nil,
         queryItems: [String: String?]? = nil,
         body: Encodable? = nil,
+        retryCount: Int = 0,
         completionHandler: ((Data?, Error?) -> Void)? = { _,_ in }
     ) throws {
         var request = try makeRequest(requestUrl: url, method: "POST", pathParams: pathParams, queryItems: queryItems)
@@ -82,6 +98,6 @@ final class Api {
             request.httpBody = try JSONEncoder().encode(body)
         }
         
-        sendRequest(request: request, completionHandler: completionHandler!)
+        sendRequest(request: request, retryCount: retryCount, completionHandler: completionHandler!)
     }
 }

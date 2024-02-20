@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IdxDmpSdk'
-  s.version          = '2.0.1'
+  s.version          = '2.1.0'
   s.summary          = 'IDX DMP iOS SDK'
   s.swift_version    = '5.7'
 
@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+  IDX DMP Android SDK.
                        DESC
 
   s.homepage         = 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk'

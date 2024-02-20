@@ -43,8 +43,9 @@ class ViewController: UIViewController {
         }
 
         let adRequest: GAMRequest = GAMRequest()
+        let userId: String = dmp.getUserId() ?? ""
 
-        adRequest.customTargeting = ["dxseg": dmp.getDefinitionIds()]
+        adRequest.customTargeting = ["dxseg": dmp.getDefinitionIds(), "dxu": userId, "permutive": userId]
     }
 
     ...
