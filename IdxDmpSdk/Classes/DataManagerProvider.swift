@@ -195,8 +195,7 @@ public final class DataManagerProvider {
         do {
             try Api.get(
                 url: Config.Api.stateUrl,
-                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()],
-                retryCount: 2
+                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
             ) {(data, error) in
                 self.updateUserState(data: data)
                 self.getConfig(completionHandler: completionHandler)
@@ -285,8 +284,7 @@ public final class DataManagerProvider {
             try Api.post(
                 url: Config.Api.eventUrl,
                 queryItems: ["ts": getTimestamp(), "dmpid": userId],
-                body: eventBody,
-                retryCount: 3
+                body: eventBody
             ) {(data, error) in
                 self.updateUserState(data: data)
                 self.calculateAudiences()

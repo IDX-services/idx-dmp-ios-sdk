@@ -38,7 +38,7 @@ final class Monitoring {
     
     private func printMessage(_ message: String, _ level: ELogLevel) {
         setCurrentLevel(level)
-        let formattedMessage = "[DMP monitoring, platform: iOS, version: \(buildNumber)" + (label != nil ? ", label: \(label as! String)" : "") + "]: \(message)"
+        let formattedMessage = "[DMP monitoring, platform: iOS, version: \(buildNumber)" + (label != nil ? ", label: \(label!)" : "") + "]: \(message)"
 
         logHistory.append(formattedMessage)
         NSLog(formattedMessage)
