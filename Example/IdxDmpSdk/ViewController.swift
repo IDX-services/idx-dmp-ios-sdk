@@ -37,6 +37,14 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var labelDebugOutput: UILabel!
     
+    @IBAction func navigateToWebview() {
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+
+        let nextViewController = storyBoard.instantiateViewController(withIdentifier: "WebviewViewController") as! WebviewViewController
+        nextViewController.modalPresentationStyle = .fullScreen
+        self.present(nextViewController, animated:true, completion:nil)
+    }
+    
     @IBAction func handleSendEvent() {
         labelDebugOutput.text = ""
 
@@ -63,22 +71,24 @@ class ViewController: UIViewController {
             if (error != nil) {
                 self.dmp!.resetState()
             }
-
-            self.labelDebugOutput.text = """
-                \(error == nil ? "Success PAGE VIEW with params:" : "Failed request with params:")
-                URL: \(requestProps.url)
-                Title: \(requestProps.title)
-                Domain: \(requestProps.domain)
-                Author: \(requestProps.author)
-                Category: \(requestProps.category)
-                Desc: \(requestProps.description)
-                Tags: \(requestProps.tags)
-                UserId: \(self.dmp!.getUserId()?.description ?? "")
-                Timestamp: \(self.dmp!.getTimestamp()?.description ?? "")
-                OS Version: \(UIDevice.current.systemVersion)
-                Device Id: \(String(describing: UIDevice.current.identifierForVendor))
-                Model: \(UIDevice.current.model)
-            """
+            
+            DispatchQueue.main.async {
+                self.labelDebugOutput.text = """
+                    \(error == nil ? "Success PAGE VIEW with params:" : "Failed request with params:")
+                    URL: \(requestProps.url)
+                    Title: \(requestProps.title)
+                    Domain: \(requestProps.domain)
+                    Author: \(requestProps.author)
+                    Category: \(requestProps.category)
+                    Desc: \(requestProps.description)
+                    Tags: \(requestProps.tags)
+                    UserId: \(self.dmp!.getUserId()?.description ?? "")
+                    Timestamp: \(self.dmp!.getTimestamp()?.description ?? "")
+                    OS Version: \(UIDevice.current.systemVersion)
+                    Device Id: \(String(describing: UIDevice.current.identifierForVendor))
+                    Model: \(UIDevice.current.model)
+                """
+            }
         }
     }
     

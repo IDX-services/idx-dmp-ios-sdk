@@ -54,21 +54,19 @@ final class Api {
                 completionHandler(nil, error)
             }
 
-            DispatchQueue.main.async {
-                guard let data = data else {
-                    return handleResponse(EDMPError.responseIsEmpty)
-                }
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    return handleResponse(EDMPError.responseIsEmpty)
-                }
-
-                if (httpResponse.statusCode != 200) {
-                    return handleResponse(EDMPError.requestError)
-                }
-
-                completionHandler(data, error)
+            guard let data = data else {
+                return handleResponse(EDMPError.responseIsEmpty)
             }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return handleResponse(EDMPError.responseIsEmpty)
+            }
+
+            if (httpResponse.statusCode != 200) {
+                return handleResponse(EDMPError.requestError)
+            }
+
+            completionHandler(data, error)
         }.resume()
     }
     

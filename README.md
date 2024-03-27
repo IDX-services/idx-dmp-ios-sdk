@@ -19,7 +19,7 @@ it, simply add the following line to your Podfile:
 pod 'IdxDmpSdk'
 ```
 
-## Integration example
+## Integration DataManagerProvider example
 
 ```swift
 class ViewController: UIViewController {
@@ -46,6 +46,39 @@ class ViewController: UIViewController {
         let userId: String = dmp.getUserId() ?? ""
 
         adRequest.customTargeting = ["dxseg": dmp.getDefinitionIds(), "dxu": userId, "permutive": userId]
+    }
+
+    ...
+}
+```
+
+## Integration DMPWebViewConnector example
+
+```swift
+class ViewController: UIViewController {
+    var dmpWebViewConnector: DMPWebViewConnector?
+    
+    ...
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // You have to set your WKWebView instance
+        connector = DMPWebViewConnector(yourWebView.configuration.userContentController)
+    }
+
+    ...
+    
+    @IBAction func handleShowAd() {
+        guard let connector = self.connector else {
+            return
+        }
+
+        let adRequest: GAMRequest = GAMRequest()
+
+        let userId: String = connector?.getUserId() ?? ""
+        let defintionsIds: String = connector?.getDefinitionIds() ?? ""
+
+        adRequest.customTargeting = ["dxseg": defintionsIds, "dxu": userId, "permutive": userId]
     }
 
     ...
