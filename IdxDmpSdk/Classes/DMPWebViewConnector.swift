@@ -40,4 +40,8 @@ public final class DMPWebViewConnector: NSObject, WKScriptMessageHandler {
     public func getDefinitionIds() -> String {
         return definitionIds
     }
+    
+    public func getCustomAdTargeting() -> [String: String] {
+        return ["dxseg": definitionIds, "dxu": userId, "permutive": userId]
+    }
 }

@@ -35,8 +35,7 @@ class WebviewViewController: UIViewController {
     
     @IBAction func handleShowDebug() {
         self.labelDebugOutput.text = """
-            User Id: \(connector?.getUserId() ?? ""))
-            Definition Ids: \(connector?.getDefinitionIds() ?? ""))
+            Custom targeting: \(connector?.getCustomAdTargeting())
         """
     }
 
