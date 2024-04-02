@@ -156,6 +156,15 @@ struct ProviderExclusionStruct: Decodable {
     let type: EProviderExclusionType
 }
 
+struct ProviderActivationStruct: Decodable {
+    let uuid: String?
+    let sdkWebEnabled: Bool?
+    let sdkIosEnabled: Bool?
+    let sdkAndroidEnabled: Bool?
+    let sdkFlutterEnabled: Bool?
+    let sdkReactNativeEnabled: Bool?
+}
+
 struct ProviderConfigStruct: Decodable {
     let uuid: String
     let fieldExtractions: [FieldExtractionConfigStruct]
@@ -163,4 +172,5 @@ struct ProviderConfigStruct: Decodable {
     let isDataCollectionEnabled: Bool
     let isDFPActivationEnabled: Bool
     let providerMonitoring: MonitoringConfigStruct
+    let providerSdk: ProviderActivationStruct?
 }

@@ -20,8 +20,7 @@ public final class DataManagerProvider {
             } else {
                 throw EDMPError.databaseConnectFailed
             }
-            self.getState(completionHandler: completionHandler)
-            self.definitionIds = self.getPrevDefinitionIds()
+            self.getConfig(completionHandler: completionHandler)
         } catch {
             databaseStorage = nil
             self.monitoring.complete(EDMPError.databaseConnectFailed)
@@ -131,6 +130,15 @@ public final class DataManagerProvider {
         return definitionIds.joined(separator: ",")
     }
     
+    public func getCustomAdTargeting() -> [String: String] {
+        let userId: String = getUserId() ?? ""
+        return ["dxseg": getDefinitionIds(), "dxu": userId, "permutive": userId]
+    }
+    
+    private func isSdkEnabled() -> Bool {
+        return providerConfig?.providerSdk?.sdkIosEnabled ?? true
+    }
+    
     private func isIgnoreEvents(properties: EventRequestPropertiesStruct) -> Bool {
         do {
             return try self.providerConfig?.providerExclusions.first {rule in
@@ -173,7 +181,30 @@ public final class DataManagerProvider {
                 self.providerConfig = providerConfig
                 
                 self.monitoring.setMonitoringConfig(providerConfig.providerMonitoring)
+                
+                if (!self.isSdkEnabled()) {
+                    self.monitoring.warning("Stop initialization! SDK is disabled, provider id: \(self.providerId)")
+                    return completionHandler(nil)
+                }
 
+                self.getState(completionHandler: completionHandler)
+            }
+        } catch {
+            completionHandler(error)
+            monitoring.complete(error)
+        }
+    }
+    
+    private func getState(completionHandler: @escaping (Any?) -> Void = {_ in }) {
+        do {
+            self.definitionIds = self.getPrevDefinitionIds()
+
+            try Api.get(
+                url: Config.Api.stateUrl,
+                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
+            ) {(data, error) in
+                self.updateUserState(data: data)
+                
                 if (!self.initIsComplete) {
                     self.initIsComplete = true
                     self.eventRequestQueue.forEach { eventQueueItem in
@@ -185,20 +216,6 @@ public final class DataManagerProvider {
                 }
 
                 completionHandler(error)
-            }
-        } catch {
-            monitoring.complete(error)
-        }
-    }
-    
-    private func getState(completionHandler: @escaping (Any?) -> Void = {_ in }) {
-        do {
-            try Api.get(
-                url: Config.Api.stateUrl,
-                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
-            ) {(data, error) in
-                self.updateUserState(data: data)
-                self.getConfig(completionHandler: completionHandler)
             }
         } catch {
             completionHandler(error)
@@ -257,6 +274,11 @@ public final class DataManagerProvider {
     }
     
     public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping (Any?) -> Void = {_ in}) {
+        if (!self.isSdkEnabled()) {
+            monitoring.warning("Event sending has been ignored! SDK is disabled, provider id: \(providerId)")
+            return completionHandler(nil)
+        }
+
         if (!self.initIsComplete) {
             self.eventRequestQueue.append(EventQueueItem(properties: properties, callback: completionHandler))
             return completionHandler(nil)

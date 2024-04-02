@@ -105,9 +105,7 @@ class ViewController: UIViewController {
         addBannerViewToView(bannerView)
 
         let adRequest: GAMRequest = GAMRequest()
-        let userId: String = dmp.getUserId() ?? ""
-
-        adRequest.customTargeting = ["dxseg": dmp.getDefinitionIds(), "dxu": userId, "permutive": userId]
+        adRequest.customTargeting = dmp.getCustomAdTargeting()
         
         labelDebugOutput.text = "Success Ad Request with CUSTOM GOOGLE PARAMS:\n\n\(String(describing: adRequest.customTargeting))"
 
