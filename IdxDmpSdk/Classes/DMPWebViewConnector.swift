@@ -3,11 +3,16 @@ import WebKit
 public final class DMPWebViewConnector: NSObject, WKScriptMessageHandler {
     private let handlerName: String = "sendDataToDmpNativeSdk"
 
+    private var monitoring: Monitoring?
+
+    private var errorCounter: Int = 0
     private var userId: String = ""
     private var definitionIds: String = ""
 
-    public init(_ controller: WKUserContentController) {
+    public init(_ controller: WKUserContentController, _ monitoringLabel: String?) {
         super.init()
+        
+        self.monitoring = Monitoring(label: monitoringLabel)
 
         controller.add(self, name: handlerName)
     }
@@ -21,6 +26,7 @@ public final class DMPWebViewConnector: NSObject, WKScriptMessageHandler {
         }
 
         guard let data = message.body as? [String : String] else {
+            errorCounter = errorCounter + 1
             return
         }
         
@@ -31,6 +37,15 @@ public final class DMPWebViewConnector: NSObject, WKScriptMessageHandler {
         definitionIds = data.first(where: { (key: String, value: String) in
             key == "definitionIdsAsString"
         })?.value ?? ""
+        
+        if (userId.isEmpty || definitionIds.isEmpty) {
+            errorCounter = errorCounter + 1
+        }
+        
+        if (errorCounter > 9) {
+            errorCounter = 0
+            monitoring?.complete(EDMPError.webViewDataAlwaysEmpty)
+        }
     }
     
     public func getUserId() -> String {

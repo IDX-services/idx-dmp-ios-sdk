@@ -94,6 +94,8 @@ final class Monitoring {
             self.printMessage("Config data parse error", ELogLevel.Errors)
         case EDMPError.configExpressionError:
             self.printMessage("Config expression error", ELogLevel.Errors)
+        case EDMPError.webViewDataAlwaysEmpty:
+            self.printMessage("[DMPWebViewConnector error] Web view data always empty!", ELogLevel.Errors)
         default:
             self.printMessage("Unknown exception, error: \(errorInstance)", ELogLevel.Errors)
         }

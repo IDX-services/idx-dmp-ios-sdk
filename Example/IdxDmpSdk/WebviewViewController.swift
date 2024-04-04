@@ -41,7 +41,7 @@ class WebviewViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        connector = DMPWebViewConnector(webView.configuration.userContentController)
+        connector = DMPWebViewConnector(webView.configuration.userContentController, "My example app")
     }
     
 

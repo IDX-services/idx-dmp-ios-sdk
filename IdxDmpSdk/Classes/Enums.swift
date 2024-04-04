@@ -68,6 +68,7 @@ enum EDMPError: Error {
     case configDataIsEmpty
     case configDataParseError
     case configExpressionError
+    case webViewDataAlwaysEmpty
     case requestError
 }
 

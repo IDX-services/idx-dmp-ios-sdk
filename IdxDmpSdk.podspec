@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IdxDmpSdk'
-  s.version          = '2.3.0'
+  s.version          = '2.3.1'
   s.summary          = 'IDX DMP iOS SDK'
   s.swift_version    = '5.7'
 
@@ -23,6 +23,7 @@ Pod::Spec.new do |s|
                        DESC
 
   s.homepage         = 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk'
+  s.readme           = 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk/blob/main/README.md'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Brainway LTD' => 'brainway.co.il' }

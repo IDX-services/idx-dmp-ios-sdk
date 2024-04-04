@@ -1,7 +1,7 @@
 struct Config {
     struct Api {
         private static let baseUrl = "https://event.dxmdp.com/rest/api/v1"
-        private static let backofficeUrl = "https://mngr.dxmdp.com"
+        private static let backofficeUrl = "https://tags.dxmdp.com"
 
         static let stateUrl = "\(Config.Api.baseUrl)/state"
         static let eventUrl = "\(Config.Api.baseUrl)/events"
