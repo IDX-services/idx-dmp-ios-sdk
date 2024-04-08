@@ -308,10 +308,12 @@ public final class DataManagerProvider {
                 queryItems: ["ts": getTimestamp(), "dmpid": userId],
                 body: eventBody
             ) {(data, error) in
-                self.updateUserState(data: data)
-                self.calculateAudiences()
-                completionHandler(error)
-                self.monitoring.complete()
+                DispatchQueue.main.async {
+                    self.updateUserState(data: data)
+                    self.calculateAudiences()
+                    completionHandler(error)
+                    self.monitoring.complete()
+                }
             }
         } catch {
             completionHandler(error)
