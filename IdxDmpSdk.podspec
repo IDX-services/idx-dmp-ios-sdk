@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IdxDmpSdk'
-  s.version          = '2.3.2'
+  s.version          = '2.3.3'
   s.summary          = 'IDX DMP iOS SDK'
   s.swift_version    = '5.7'
 
@@ -22,12 +22,12 @@ Pod::Spec.new do |s|
   IDX DMP Android SDK.
                        DESC
 
-  s.homepage         = 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk'
-  s.readme           = 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk/blob/main/README.md'
+  s.homepage         = 'https://github.com/IDX-services/idx-dmp-ios-sdk'
+  s.readme           = 'https://github.com/IDX-services/idx-dmp-ios-sdk/blob/main/README.md'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Brainway LTD' => 'brainway.co.il' }
-  s.source           = { :git => 'https://github.com/Brainway-LTD/idx-dmp-ios-sdk.git', :tag => s.version.to_s }
+  s.author           = { 'IDX LTD' => 'www.id-x.co.il' }
+  s.source           = { :git => 'https://github.com/IDX-services/idx-dmp-ios-sdk.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '11.0'

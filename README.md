@@ -81,7 +81,7 @@ class ViewController: UIViewController {
 
 ## Author
 
-Brainway LTD, https://brainway.co.il/
+IDX LTD, https://www.id-x.co.il/
 
 ## License
 
