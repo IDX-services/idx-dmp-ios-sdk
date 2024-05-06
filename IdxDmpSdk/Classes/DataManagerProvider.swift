@@ -214,12 +214,43 @@ public final class DataManagerProvider {
                         )
                     }
                 }
+                
+                PeriodicActions.runAction(
+                    intervalMs: 1000 * 60 * 60,
+                    actionName: "SEND_SYNC_EVENT",
+                    action: self.sendSyncEvent
+                )
 
                 completionHandler(error)
             }
         } catch {
             completionHandler(error)
             monitoring.complete(error)
+        }
+    }
+    
+    private func sendSyncEvent() {
+        monitoring.log("start sending sync event")
+        guard let userId = getUserId() else {
+            return monitoring.error(EDMPError.userIdIsEmpty)
+        }
+        
+        do {
+            let eventBody = SyncEventRequestStruct(
+                event: EDMPSyncEvent.AUDIENCE_PING,
+                userId: userId,
+                providerId: self.providerId,
+                actualAudienceCodes: definitionIds
+            )
+
+            try Api.post(
+                url: Config.Api.eventUrl,
+                queryItems: ["ts": getTimestamp(), "dmpid": userId],
+                body: eventBody
+            )
+            monitoring.log("end sending sync event")
+        } catch {
+            monitoring.error(error)
         }
     }
     

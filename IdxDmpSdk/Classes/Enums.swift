@@ -6,6 +6,10 @@ enum EDMPStatisticEvent: String, Encodable {
     case AUDIENCE_ENTER, AUDIENCE_EXIT
 }
 
+enum EDMPSyncEvent: String, Encodable {
+    case AUDIENCE_PING
+}
+
 enum EDefinitionType: String, Decodable {
     case STANDARD, CURRENT_PAGE
 }

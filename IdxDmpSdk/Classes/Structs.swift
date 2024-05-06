@@ -89,7 +89,7 @@ struct EnterAndExitDefinitionIds {
     let exitIds: [String]
 }
 
-public struct StatisticEventRequestPropertiesStruct: Encodable {
+public struct EventRequestAdditionalPropertiesStruct: Encodable {
     public let devicePlatform: String
 
     public init() {
@@ -103,7 +103,7 @@ struct StatisticEventRequestStruct: Encodable {
     let providerId: String
     let audienceCode: String
     let actualAudienceCodes: [String]
-    let properties: StatisticEventRequestPropertiesStruct
+    let properties: EventRequestAdditionalPropertiesStruct
     
     public init(
         event: EDMPStatisticEvent,
@@ -117,7 +117,28 @@ struct StatisticEventRequestStruct: Encodable {
         self.providerId = providerId
         self.audienceCode = audienceCode
         self.actualAudienceCodes = actualAudienceCodes
-        self.properties = StatisticEventRequestPropertiesStruct()
+        self.properties = EventRequestAdditionalPropertiesStruct()
+    }
+}
+
+struct SyncEventRequestStruct: Encodable {
+    let event: EDMPSyncEvent
+    let userId: String
+    let providerId: String
+    let actualAudienceCodes: [String]
+    let properties: EventRequestAdditionalPropertiesStruct
+    
+    public init(
+        event: EDMPSyncEvent,
+        userId: String,
+        providerId: String,
+        actualAudienceCodes: [String]
+    ) {
+        self.event = event
+        self.userId = userId
+        self.providerId = providerId
+        self.actualAudienceCodes = actualAudienceCodes
+        self.properties = EventRequestAdditionalPropertiesStruct()
     }
 }
 
