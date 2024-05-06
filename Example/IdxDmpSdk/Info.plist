@@ -240,5 +240,7 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 	</array>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>It makes our adwords more compatibility with your interests</string>
 </dict>
 </plist>

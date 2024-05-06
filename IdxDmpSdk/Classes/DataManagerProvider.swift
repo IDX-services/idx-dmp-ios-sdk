@@ -1,3 +1,6 @@
+import AdSupport
+import AppTrackingTransparency
+
 public final class DataManagerProvider {
     let providerId: String
     let localStorage = UserDefaults.standard
@@ -8,6 +11,7 @@ public final class DataManagerProvider {
     var providerConfig: ProviderConfigStruct?
     var eventRequestQueue: [EventQueueItem] = []
     var definitionIds: [String] = []
+    var advertisingId: String = ""
     
     public init(providerId: String, monitoringLabel: String?, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         self.providerId = providerId
@@ -20,6 +24,15 @@ public final class DataManagerProvider {
             } else {
                 throw EDMPError.databaseConnectFailed
             }
+
+            if #available(iOS 14.0, *) {
+                ATTrackingManager.requestTrackingAuthorization { status in
+                    if (status == .authorized) {
+                        self.advertisingId = ASIdentifierManager.shared().advertisingIdentifier.uuidString
+                    }
+                }
+            }
+
             self.getConfig(completionHandler: completionHandler)
         } catch {
             databaseStorage = nil
@@ -54,6 +67,19 @@ public final class DataManagerProvider {
     
     public func getProviderId() -> String {
         return providerId
+    }
+    
+    private func getDeviceId() -> String {
+        if (!advertisingId.isEmpty) {
+            return advertisingId
+        }
+
+        let identifierManager = ASIdentifierManager.shared()
+        if identifierManager.isAdvertisingTrackingEnabled {
+            return identifierManager.advertisingIdentifier.uuidString
+        }
+        
+        return UIDevice.current.identifierForVendor?.uuidString ?? "UNKNOWN_DEVICE_ID"
     }
     
     private func updateUserState(data: Data?) {
@@ -330,6 +356,7 @@ public final class DataManagerProvider {
             event: EDMPEvent.PAGE_VIEW,
             userId: userId,
             providerId: self.providerId,
+            fingerprint: self.getDeviceId(),
             properties: properties
         )
         

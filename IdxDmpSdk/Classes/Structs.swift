@@ -76,6 +76,7 @@ public struct EventRequestStruct: Encodable {
     let event: EDMPEvent
     let userId: String
     let providerId: String
+    let fingerprint: String
     let properties: EventRequestPropertiesStruct
 }
 
