@@ -242,7 +242,7 @@ public final class DataManagerProvider {
                 }
                 
                 PeriodicActions.runAction(
-                    intervalMs: 1000 * 60 * 60,
+                    intervalSec: self.providerConfig?.pingFrequencySec,
                     actionName: "SEND_SYNC_EVENT",
                     action: self.sendSyncEvent
                 )

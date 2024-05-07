@@ -17,8 +17,18 @@ final class PeriodicActions {
         return Int64(lastTimestamp)
     }
 
-    static func runAction(intervalMs: Int64, actionName: String, action: () -> Void, errorHandler: ((Error?) -> Void)? = { _ in }) {
+    static func runAction(intervalSec: Int?, actionName: String, action: () -> Void, errorHandler: ((Error?) -> Void)? = { _ in }) {
         let currentTimestamp = Date().getCurrentTimestamp()
+        
+        guard let interval = intervalSec else {
+            return
+        }
+        
+        if (interval <= 0) {
+            return
+        }
+        
+        let intervalMs: Int64 = Int64(interval * 1000)
         
         if (currentTimestamp >= getPeriodicActionLastTimestamp(actionName) + intervalMs) {
             action()

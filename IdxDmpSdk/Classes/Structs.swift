@@ -193,6 +193,7 @@ struct ProviderConfigStruct: Decodable {
     let providerExclusions: [ProviderExclusionStruct]
     let isDataCollectionEnabled: Bool
     let isDFPActivationEnabled: Bool
+    let pingFrequencySec: Int
     let providerMonitoring: MonitoringConfigStruct
     let providerSdk: ProviderActivationStruct?
 }
