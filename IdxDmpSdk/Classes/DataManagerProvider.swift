@@ -229,25 +229,27 @@ public final class DataManagerProvider {
                 url: Config.Api.stateUrl,
                 queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
             ) {(data, error) in
-                self.updateUserState(data: data)
-                
-                if (!self.initIsComplete) {
-                    self.initIsComplete = true
-                    self.eventRequestQueue.forEach { eventQueueItem in
-                        self.sendEvent(
-                            properties: eventQueueItem.properties,
-                            completionHandler: eventQueueItem.callback
-                        )
+                DispatchQueue.main.async {
+                    self.updateUserState(data: data)
+                    
+                    if (!self.initIsComplete) {
+                        self.initIsComplete = true
+                        self.eventRequestQueue.forEach { eventQueueItem in
+                            self.sendEvent(
+                                properties: eventQueueItem.properties,
+                                completionHandler: eventQueueItem.callback
+                            )
+                        }
                     }
-                }
-                
-                PeriodicActions.runAction(
-                    intervalSec: self.providerConfig?.pingFrequencySec,
-                    actionName: "SEND_SYNC_EVENT",
-                    action: self.sendSyncEvent
-                )
+                    
+                    PeriodicActions.runAction(
+                        intervalSec: self.providerConfig?.pingFrequencySec,
+                        actionName: "SEND_SYNC_EVENT",
+                        action: self.sendSyncEvent
+                    )
 
-                completionHandler(error)
+                    completionHandler(error)
+                }
             }
         } catch {
             completionHandler(error)
@@ -289,44 +291,34 @@ public final class DataManagerProvider {
 
         self.monitoring.log("enterDefinitionIds: \(enterAndExitDefinitionIds.enterIds), exitDefinitionIds: \(enterAndExitDefinitionIds.exitIds)")
 
-        enterAndExitDefinitionIds.enterIds.forEach { id in
-            let eventBody = StatisticEventRequestStruct(
+        let enterEventRequest = enterAndExitDefinitionIds.enterIds.map { id in
+            return StatisticEventRequestStruct(
                 event: EDMPStatisticEvent.AUDIENCE_ENTER,
                 userId: userId,
                 providerId: self.providerId,
                 audienceCode: id,
                 actualAudienceCodes: definitionIds
             )
-            
-            do {
-                try Api.post(
-                    url: Config.Api.eventUrl,
-                    queryItems: ["ts": getTimestamp(), "dmpid": userId],
-                    body: eventBody
-                )
-            } catch {
-                monitoring.error(error)
-            }
         }
         
-        enterAndExitDefinitionIds.exitIds.forEach { id in
-            let eventBody = StatisticEventRequestStruct(
+        let exitEventRequest = enterAndExitDefinitionIds.exitIds.map { id in
+            return StatisticEventRequestStruct(
                 event: EDMPStatisticEvent.AUDIENCE_EXIT,
                 userId: userId,
                 providerId: self.providerId,
                 audienceCode: id,
                 actualAudienceCodes: definitionIds
             )
-            
-            do {
-                try Api.post(
-                    url: Config.Api.eventUrl,
-                    queryItems: ["ts": getTimestamp(), "dmpid": userId],
-                    body: eventBody
-                )
-            } catch {
-                monitoring.error(error)
-            }
+        }
+        
+        do {
+            try Api.post(
+                url: Config.Api.eventUrl,
+                queryItems: ["ts": getTimestamp(), "dmpid": userId],
+                body: enterEventRequest + exitEventRequest
+            )
+        } catch {
+            monitoring.error(error)
         }
     }
     
