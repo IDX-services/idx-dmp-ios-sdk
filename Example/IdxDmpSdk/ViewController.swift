@@ -37,26 +37,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var labelDebugOutput: UILabel!
     
-    @IBAction func navigateToWebview() {
-        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
-
-        let nextViewController = storyBoard.instantiateViewController(withIdentifier: "WebviewViewController") as! WebviewViewController
-        nextViewController.modalPresentationStyle = .fullScreen
-        self.present(nextViewController, animated:true, completion:nil)
-    }
-    
-    @IBAction func handleSendEvent() {
-        labelDebugOutput.text = ""
-
-        guard let providerId = textFieldProvider.text else {
-            self.showToast("Provider id is empty!")
-            return
-        }
-
-        self.dmp = DataManagerProvider(providerId: providerId, monitoringLabel: "Example app") {_ in
-//            self.showToast("Provider id has been init")
-        }
-        
+    func onSendEvent() {
         let requestProps = EventRequestPropertiesStruct(
             url: textFieldUrl.text ?? "",
             title: textFieldTitle.text ?? "",
@@ -92,11 +73,36 @@ class ViewController: UIViewController {
         }
     }
     
+    @IBAction func navigateToWebview() {
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+
+        let nextViewController = storyBoard.instantiateViewController(withIdentifier: "WebviewViewController") as! WebviewViewController
+        nextViewController.modalPresentationStyle = .fullScreen
+        self.present(nextViewController, animated:true, completion:nil)
+    }
+    
+    @IBAction func handleSendEvent() {
+        labelDebugOutput.text = ""
+
+        guard let providerId = textFieldProvider.text else {
+            self.showToast("Provider id is empty!")
+            return
+        }
+
+        self.dmp = DataManagerProvider(providerId: providerId, appName: "Example app", appVersion: "1.0.0") {_ in
+//            self.showToast("Provider id has been init")
+        }
+        
+        onSendEvent()
+    }
+    
     @IBAction func handleShowAd() {
         guard let dmp = self.dmp else {
             self.showToast("DMP is not init!")
             return
         }
+        
+//        onSendEvent()
 
         bannerView = GADBannerView(adSize: GADAdSizeBanner)
         bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
@@ -106,7 +112,7 @@ class ViewController: UIViewController {
 
         let adRequest: GAMRequest = GAMRequest()
         adRequest.customTargeting = dmp.getCustomAdTargeting()
-        
+
         labelDebugOutput.text = "Success Ad Request with CUSTOM GOOGLE PARAMS:\n\n\(String(describing: adRequest.customTargeting))"
 
         bannerView.load(adRequest)

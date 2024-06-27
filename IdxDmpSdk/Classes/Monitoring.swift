@@ -44,6 +44,10 @@ final class Monitoring {
         NSLog(formattedMessage)
     }
     
+    func getBuildNumber () -> String {
+        return buildNumber
+    }
+    
     func setMonitoringConfig (_ monitoringConfig: MonitoringConfigStruct) {
         self.monitoringConfig = monitoringConfig
     }

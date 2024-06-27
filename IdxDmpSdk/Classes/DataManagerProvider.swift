@@ -6,6 +6,7 @@ public final class DataManagerProvider {
     let localStorage = UserDefaults.standard
     let monitoring: Monitoring
     let databaseStorage: Storage?
+    let sdkMetaData: SdkMetaDataStruct
 
     var initIsComplete = false
     var providerConfig: ProviderConfigStruct?
@@ -13,9 +14,15 @@ public final class DataManagerProvider {
     var definitionIds: [String] = []
     var advertisingId: String = ""
     
-    public init(providerId: String, monitoringLabel: String?, completionHandler: @escaping (Any?) -> Void = {_ in}) {
+    public init(providerId: String, appName: String, appVersion: String, completionHandler: @escaping (Any?) -> Void = {_ in}) {
         self.providerId = providerId
-        self.monitoring = Monitoring(label: monitoringLabel)
+        self.monitoring = Monitoring(label: appName)
+        self.sdkMetaData = SdkMetaDataStruct(
+            sdkName: "iOS DMP CORE SDK",
+            sdkVer: monitoring.getBuildNumber(),
+            appName: appName,
+            appVer: appVersion
+        )
         
         self.monitoring.log("Init with provider id: \(providerId)")
         do {
@@ -268,7 +275,8 @@ public final class DataManagerProvider {
                 event: EDMPSyncEvent.AUDIENCE_PING,
                 userId: userId,
                 providerId: self.providerId,
-                actualAudienceCodes: definitionIds
+                actualAudienceCodes: definitionIds,
+                srcMeta: sdkMetaData
             )
 
             try Api.post(
@@ -297,7 +305,8 @@ public final class DataManagerProvider {
                 userId: userId,
                 providerId: self.providerId,
                 audienceCode: id,
-                actualAudienceCodes: definitionIds
+                actualAudienceCodes: definitionIds,
+                srcMeta: sdkMetaData
             )
         }
         
@@ -307,7 +316,8 @@ public final class DataManagerProvider {
                 userId: userId,
                 providerId: self.providerId,
                 audienceCode: id,
-                actualAudienceCodes: definitionIds
+                actualAudienceCodes: definitionIds,
+                srcMeta: sdkMetaData
             )
         }
         
@@ -348,8 +358,9 @@ public final class DataManagerProvider {
             event: EDMPEvent.PAGE_VIEW,
             userId: userId,
             providerId: self.providerId,
-            fingerprint: self.getDeviceId(),
-            properties: properties
+            dxf: self.getDeviceId(),
+            properties: properties,
+            srcMeta: sdkMetaData
         )
         
         do {

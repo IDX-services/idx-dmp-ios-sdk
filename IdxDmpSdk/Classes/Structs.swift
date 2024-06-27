@@ -72,12 +72,32 @@ public struct EventRequestPropertiesStruct: Encodable {
     }
 }
 
+public struct SdkMetaDataStruct: Encodable {
+    public let sdkName: String
+    public let sdkVer: String
+    public let appName: String
+    public let appVer: String
+
+    public init(
+        sdkName: String,
+        sdkVer: String,
+        appName: String,
+        appVer: String
+    ) {
+        self.sdkName = sdkName
+        self.sdkVer = sdkVer
+        self.appName = appName
+        self.appVer = appVer
+    }
+}
+
 public struct EventRequestStruct: Encodable {
     let event: EDMPEvent
     let userId: String
     let providerId: String
-    let fingerprint: String
+    let dxf: String
     let properties: EventRequestPropertiesStruct
+    let srcMeta: SdkMetaDataStruct
 }
 
 struct EventQueueItem {
@@ -105,13 +125,15 @@ struct StatisticEventRequestStruct: Encodable {
     let audienceCode: String
     let actualAudienceCodes: [String]
     let properties: EventRequestAdditionalPropertiesStruct
+    let srcMeta: SdkMetaDataStruct
     
     public init(
         event: EDMPStatisticEvent,
         userId: String,
         providerId: String,
         audienceCode: String,
-        actualAudienceCodes: [String]
+        actualAudienceCodes: [String],
+        srcMeta: SdkMetaDataStruct
     ) {
         self.event = event
         self.userId = userId
@@ -119,6 +141,7 @@ struct StatisticEventRequestStruct: Encodable {
         self.audienceCode = audienceCode
         self.actualAudienceCodes = actualAudienceCodes
         self.properties = EventRequestAdditionalPropertiesStruct()
+        self.srcMeta = srcMeta
     }
 }
 
@@ -128,18 +151,21 @@ struct SyncEventRequestStruct: Encodable {
     let providerId: String
     let actualAudienceCodes: [String]
     let properties: EventRequestAdditionalPropertiesStruct
+    let srcMeta: SdkMetaDataStruct
     
     public init(
         event: EDMPSyncEvent,
         userId: String,
         providerId: String,
-        actualAudienceCodes: [String]
+        actualAudienceCodes: [String],
+        srcMeta: SdkMetaDataStruct
     ) {
         self.event = event
         self.userId = userId
         self.providerId = providerId
         self.actualAudienceCodes = actualAudienceCodes
         self.properties = EventRequestAdditionalPropertiesStruct()
+        self.srcMeta = srcMeta
     }
 }
 

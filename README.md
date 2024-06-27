@@ -30,7 +30,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.dmp = DataManagerProvider(providerId: providerId, monitoringLabel: "My app name") {_ in
+        self.dmp = DataManagerProvider(providerId: providerId, appName: "My app name", appVersion: "1.0.0") {_ in
           // Success callback
         }
     }
@@ -61,7 +61,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // You have to set your WKWebView instance
-        connector = DMPWebViewConnector(yourWebView.configuration.userContentController)
+        connector = DMPWebViewConnector(yourWebView.configuration.userContentController, "My app name", "1.0.0")
     }
 
     ...
