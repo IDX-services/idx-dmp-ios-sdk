@@ -7,10 +7,10 @@ public final class DataManagerProvider {
     let monitoring: Monitoring
     let databaseStorage: Storage?
     let sdkMetaData: SdkMetaDataStruct
+    
+    let asyncEventsQueue = AsyncEventQueue()
 
-    var initIsComplete = false
     var providerConfig: ProviderConfigStruct?
-    var eventRequestQueue: [EventQueueItem] = []
     var definitionIds: [String] = []
     var advertisingId: String = ""
     
@@ -27,7 +27,7 @@ public final class DataManagerProvider {
         self.monitoring.log("Init with provider id: \(providerId)")
         do {
             if #available(iOS 12.0, *) {
-                databaseStorage = try Storage()
+                databaseStorage = try Storage(monitoring: self.monitoring)
             } else {
                 throw EDMPError.databaseConnectFailed
             }
@@ -41,6 +41,7 @@ public final class DataManagerProvider {
             }
 
             self.getConfig(completionHandler: completionHandler)
+            self.getState(completionHandler: completionHandler)
         } catch {
             databaseStorage = nil
             self.monitoring.complete(EDMPError.databaseConnectFailed)
@@ -118,10 +119,10 @@ public final class DataManagerProvider {
             if (userState.action == .REPLACE) {
                 try databaseConnection.removeStorageData()
             }
-            try databaseConnection.setDefinitions(definitions: userState.definitions)
-            try databaseConnection.mergeEvents(newEvents: userState.events)
-            try databaseConnection.removeDefinitions(userState.deletedDefinitionIds)
-            try databaseConnection.removeEventsByDefinitions(userState.deletedDefinitionIds)
+            databaseConnection.setDefinitions(definitions: userState.definitions)
+            databaseConnection.mergeEvents(newEvents: userState.events)
+            databaseConnection.removeDefinitions(userState.deletedDefinitionIds)
+            databaseConnection.removeEventsByDefinitions(userState.deletedDefinitionIds)
         } catch {
             monitoring.complete(error)
         }
@@ -194,61 +195,60 @@ public final class DataManagerProvider {
     }
     
     private func getConfig(completionHandler: @escaping (Any?) -> Void = {_ in }) {
-        do {
-            try Api.get(
-                url: Config.Api.configUrl,
-                pathParams: ["providerId": self.providerId]
-            ) {(data, error) in
-                let decoder = JSONDecoder()
-                
-                guard let configData = data else {
-                    self.monitoring.error(EDMPError.configDataIsEmpty)
-                    return
-                }
+        asyncEventsQueue.addTask { taskCompletion in
+            do {
+                self.monitoring.log("getConfig start")
+                try Api.get(
+                    url: Config.Api.configUrl,
+                    pathParams: ["providerId": self.providerId]
+                ) {(data, error) in
+                    let decoder = JSONDecoder()
+                    
+                    guard let configData = data else {
+                        self.monitoring.error(EDMPError.configDataIsEmpty)
+                        return taskCompletion()
+                    }
+                    
 
-                guard let providerConfig: ProviderConfigStruct = try? decoder.decode(ProviderConfigStruct.self, from: configData) else {
-                    self.monitoring.error(EDMPError.configDataParseError)
-                    return
-                }
-                
-                self.providerConfig = providerConfig
-                
-                self.monitoring.setMonitoringConfig(providerConfig.providerMonitoring)
-                
-                if (!self.isSdkEnabled()) {
-                    self.monitoring.warning("Stop initialization! SDK is disabled, provider id: \(self.providerId)")
-                    return completionHandler(nil)
-                }
+                    guard let providerConfig: ProviderConfigStruct = try? decoder.decode(ProviderConfigStruct.self, from: configData) else {
+                        self.monitoring.error(EDMPError.configDataParseError)
+                        return taskCompletion()
+                    }
+                    
+                    self.providerConfig = providerConfig
+                    self.monitoring.setMonitoringConfig(providerConfig.providerMonitoring)
+                    self.monitoring.log("getConfig end")
 
-                self.getState(completionHandler: completionHandler)
+                    taskCompletion()
+                }
+            } catch {
+                self.monitoring.complete(error)
+
+                taskCompletion()
             }
-        } catch {
-            completionHandler(error)
-            monitoring.complete(error)
         }
     }
     
     private func getState(completionHandler: @escaping (Any?) -> Void = {_ in }) {
-        do {
-            self.definitionIds = self.getPrevDefinitionIds()
+        asyncEventsQueue.addTask { taskCompletion in
+            do {
+                self.monitoring.log("getState start")
 
-            try Api.get(
-                url: Config.Api.stateUrl,
-                queryItems: ["ts": getTimestamp(), "dmpid": getUserId()]
-            ) {(data, error) in
-                DispatchQueue.main.async {
+                if (!self.isSdkEnabled()) {
+                    self.monitoring.warning("Stop initialization! SDK is disabled, provider id: \(self.providerId)")
+                    completionHandler(nil)
+                    
+                    return taskCompletion()
+                }
+                
+                self.definitionIds = self.getPrevDefinitionIds()
+
+                try Api.get(
+                    url: Config.Api.stateUrl,
+                    queryItems: ["ts": self.getTimestamp(), "dmpid": self.getUserId()]
+                ) {(data, error) in
                     self.updateUserState(data: data)
-                    
-                    if (!self.initIsComplete) {
-                        self.initIsComplete = true
-                        self.eventRequestQueue.forEach { eventQueueItem in
-                            self.sendEvent(
-                                properties: eventQueueItem.properties,
-                                completionHandler: eventQueueItem.callback
-                            )
-                        }
-                    }
-                    
+
                     PeriodicActions.runAction(
                         intervalSec: self.providerConfig?.pingFrequencySec,
                         actionName: "SEND_SYNC_EVENT",
@@ -256,140 +256,183 @@ public final class DataManagerProvider {
                     )
 
                     completionHandler(error)
+                    
+                    self.monitoring.log("getState end")
+
+                    taskCompletion()
                 }
+            } catch {
+                completionHandler(error)
+                self.monitoring.complete(error)
+                
+                taskCompletion()
             }
-        } catch {
-            completionHandler(error)
-            monitoring.complete(error)
         }
     }
     
     private func sendSyncEvent() {
-        monitoring.log("start sending sync event")
-        guard let userId = getUserId() else {
-            return monitoring.error(EDMPError.userIdIsEmpty)
-        }
-        
-        do {
-            let eventBody = SyncEventRequestStruct(
-                event: EDMPSyncEvent.AUDIENCE_PING,
-                userId: userId,
-                providerId: self.providerId,
-                actualAudienceCodes: definitionIds,
-                srcMeta: sdkMetaData
-            )
-
-            try Api.post(
-                url: Config.Api.eventUrl,
-                queryItems: ["ts": getTimestamp(), "dmpid": userId],
-                body: eventBody
-            )
-            monitoring.log("end sending sync event")
-        } catch {
-            monitoring.error(error)
+        asyncEventsQueue.addTask { taskCompletion in
+            self.monitoring.log("start sending sync event")
+            guard let userId = self.getUserId() else {
+                self.monitoring.error(EDMPError.userIdIsEmpty)
+                
+                return taskCompletion()
+            }
+            
+            do {
+                let eventBody = SyncEventRequestStruct(
+                    event: EDMPSyncEvent.AUDIENCE_PING,
+                    userId: userId,
+                    providerId: self.providerId,
+                    actualAudienceCodes: self.definitionIds,
+                    srcMeta: self.sdkMetaData
+                )
+                
+                try Api.post(
+                    url: Config.Api.eventUrl,
+                    queryItems: ["ts": self.getTimestamp(), "dmpid": userId],
+                    body: eventBody
+                ) {_,_ in 
+                    self.monitoring.log("end sending sync event")
+                    
+                    taskCompletion()
+                }
+            } catch {
+                self.monitoring.error(error)
+                
+                taskCompletion()
+            }
         }
     }
     
     private func sendStatisticEvent(newDefinitionsIds: [String], definitions: [Definition]) {
-        guard let userId = getUserId() else {
-            return monitoring.error(EDMPError.userIdIsEmpty)
-        }
-        
-        let enterAndExitDefinitionIds = getEnterAndExitDefinitionIds(oldDefinitionIds: definitionIds, newDefinitionIds: newDefinitionsIds, definitions: definitions)
+        asyncEventsQueue.addTask { taskCompletion in
+            guard let userId = self.getUserId() else {
+                self.monitoring.error(EDMPError.userIdIsEmpty)
+                
+                return taskCompletion()
+            }
+            
+            let enterAndExitDefinitionIds = getEnterAndExitDefinitionIds(oldDefinitionIds: self.definitionIds, newDefinitionIds: newDefinitionsIds, definitions: definitions)
+            
+            self.monitoring.log("enterDefinitionIds: \(enterAndExitDefinitionIds.enterIds), exitDefinitionIds: \(enterAndExitDefinitionIds.exitIds)")
+            
+            let enterEventRequest = enterAndExitDefinitionIds.enterIds.map { id in
+                return StatisticEventRequestStruct(
+                    event: EDMPStatisticEvent.AUDIENCE_ENTER,
+                    userId: userId,
+                    providerId: self.providerId,
+                    audienceCode: id,
+                    actualAudienceCodes: self.definitionIds,
+                    srcMeta: self.sdkMetaData
+                )
+            }
+            
+            let exitEventRequest = enterAndExitDefinitionIds.exitIds.map { id in
+                return StatisticEventRequestStruct(
+                    event: EDMPStatisticEvent.AUDIENCE_EXIT,
+                    userId: userId,
+                    providerId: self.providerId,
+                    audienceCode: id,
+                    actualAudienceCodes: self.definitionIds,
+                    srcMeta: self.sdkMetaData
+                )
+            }
+            
+            let events = enterEventRequest + exitEventRequest
+            
+            if (events.isEmpty) {
+                self.monitoring.log("Event statistic requests skipped: event data is empty")
 
-        self.monitoring.log("enterDefinitionIds: \(enterAndExitDefinitionIds.enterIds), exitDefinitionIds: \(enterAndExitDefinitionIds.exitIds)")
+                return taskCompletion()
+            }
+            
+            do {
+                try Api.post(
+                    url: Config.Api.eventUrl,
+                    queryItems: ["ts": self.getTimestamp(), "dmpid": userId],
+                    body: events
+                ) {_,_ in 
+                    taskCompletion()
+                }
+            } catch {
+                self.monitoring.error(error)
 
-        let enterEventRequest = enterAndExitDefinitionIds.enterIds.map { id in
-            return StatisticEventRequestStruct(
-                event: EDMPStatisticEvent.AUDIENCE_ENTER,
-                userId: userId,
-                providerId: self.providerId,
-                audienceCode: id,
-                actualAudienceCodes: definitionIds,
-                srcMeta: sdkMetaData
-            )
-        }
-        
-        let exitEventRequest = enterAndExitDefinitionIds.exitIds.map { id in
-            return StatisticEventRequestStruct(
-                event: EDMPStatisticEvent.AUDIENCE_EXIT,
-                userId: userId,
-                providerId: self.providerId,
-                audienceCode: id,
-                actualAudienceCodes: definitionIds,
-                srcMeta: sdkMetaData
-            )
-        }
-        
-        do {
-            try Api.post(
-                url: Config.Api.eventUrl,
-                queryItems: ["ts": getTimestamp(), "dmpid": userId],
-                body: enterEventRequest + exitEventRequest
-            )
-        } catch {
-            monitoring.error(error)
+                taskCompletion()
+            }
         }
     }
     
     public func sendEvent(properties: EventRequestPropertiesStruct, completionHandler: @escaping (Any?) -> Void = {_ in}) {
-        if (!self.isSdkEnabled()) {
-            monitoring.warning("Event sending has been ignored! SDK is disabled, provider id: \(providerId)")
-            return completionHandler(nil)
-        }
+        asyncEventsQueue.addTask { taskCompletion in
+            if (!self.isSdkEnabled()) {
+                self.monitoring.warning("Event sending has been ignored! SDK is disabled, provider id: \(self.providerId)")
+                completionHandler(nil)
+                
+                return taskCompletion()
+            }
 
-        if (!self.initIsComplete) {
-            self.eventRequestQueue.append(EventQueueItem(properties: properties, callback: completionHandler))
-            return completionHandler(nil)
-        }
-        
-        if (self.isIgnoreEvents(properties: properties)) {
-            monitoring.warning("Event sending is disabled: \(properties)")
-            return completionHandler(nil)
-        }
-
-        guard let userId = getUserId() else {
-            monitoring.error(EDMPError.userIdIsEmpty)
-            // TODO: set error to handler
-            return completionHandler(nil)
-        }
-
-        let eventBody = EventRequestStruct(
-            event: EDMPEvent.PAGE_VIEW,
-            userId: userId,
-            providerId: self.providerId,
-            dxf: self.getDeviceId(),
-            properties: properties,
-            srcMeta: sdkMetaData
-        )
-        
-        do {
-            try Api.post(
-                url: Config.Api.eventUrl,
-                queryItems: ["ts": getTimestamp(), "dmpid": userId],
-                body: eventBody
-            ) {(data, error) in
-                DispatchQueue.main.async {
+            if (self.isIgnoreEvents(properties: properties)) {
+                self.monitoring.warning("Event sending is disabled: \(properties)")
+                completionHandler(nil)
+                
+                return taskCompletion()
+            }
+            
+            guard let userId = self.getUserId() else {
+                self.monitoring.error(EDMPError.userIdIsEmpty)
+                // TODO: set error to handler
+                completionHandler(nil)
+                
+                return taskCompletion()
+            }
+            
+            let eventBody = EventRequestStruct(
+                event: EDMPEvent.PAGE_VIEW,
+                userId: userId,
+                providerId: self.providerId,
+                dxf: self.getDeviceId(),
+                deviceId: self.getDeviceId(),
+                properties: properties,
+                srcMeta: self.sdkMetaData
+            )
+            
+            do {
+                try Api.post(
+                    url: Config.Api.eventUrl,
+                    queryItems: ["ts": self.getTimestamp(), "dmpid": userId],
+                    body: eventBody
+                ) {(data, error) in
                     self.updateUserState(data: data)
                     self.calculateAudiences()
                     completionHandler(error)
                     self.monitoring.complete()
+                    
+                    taskCompletion()
                 }
+            } catch {
+                completionHandler(error)
+                self.monitoring.complete(error)
+                
+                taskCompletion()
             }
-        } catch {
-            completionHandler(error)
-            monitoring.complete(error)
         }
     }
     
     public func resetState () -> Void {
-        do {
-            localStorage.removeObject(forKey: "userId")
-            localStorage.removeObject(forKey: "ts")
-            self.definitionIds = []
-            try self.databaseStorage?.removeStorageData()
-        } catch {
-            monitoring.complete(error)
+        asyncEventsQueue.addTask { taskCompletion in
+            do {
+                self.localStorage.removeObject(forKey: "userId")
+                self.localStorage.removeObject(forKey: "ts")
+                self.definitionIds = []
+                try self.databaseStorage?.removeStorageData()
+                
+                taskCompletion()
+            } catch {
+                self.monitoring.complete(error)
+                
+                taskCompletion()
+            }
         }
     }
 }

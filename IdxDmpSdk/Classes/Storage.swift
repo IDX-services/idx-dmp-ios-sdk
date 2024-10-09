@@ -191,9 +191,12 @@ class StorageTransformer: NSSecureUnarchiveFromDataTransformer {
 final class Storage {
     private var storeContainer: NSPersistentContainer
     private var managedContext: NSManagedObjectContext
+    private let monitoring: Monitoring
 
-    public init() throws {
+    public init(monitoring: Monitoring) throws {
         do {
+            self.monitoring = monitoring
+
             if #available(iOS 12.0, *) {
                 StorageTransformer.register()
             } else {
@@ -216,22 +219,31 @@ final class Storage {
             container.viewContext.mergePolicy = NSOverwriteMergePolicy
 
             storeContainer = container
-            managedContext = container.viewContext
+            managedContext = container.newBackgroundContext()
+            managedContext.automaticallyMergesChangesFromParent = true
         } catch {
             throw EDMPError.databaseConnectFailed
         }
     }
     
-    public func setDefinitions(definitions: [DefinitionStruct]) throws {
-        do {
-            definitions.forEach { definitionStruct in
-                let definition = Definition(context: managedContext)
-                definition.setData(definitionStruct: definitionStruct)
-            }
+    private func performTaskInCoreData(task: @escaping (NSManagedObjectContext) -> Void) {
+        managedContext.perform {
+            task(self.managedContext)
+        }
+    }
+    
+    public func setDefinitions(definitions: [DefinitionStruct]) {
+        performTaskInCoreData { context in
+            do {
+                definitions.forEach { definitionStruct in
+                    let definition = Definition(context: context)
+                    definition.setData(definitionStruct: definitionStruct)
+                }
 
-            try managedContext.save()
-        } catch {
-            throw EDMPError.setDefinitionsFailed
+                try context.save()
+            } catch {
+                self.monitoring.error(EDMPError.setDefinitionsFailed)
+            }
         }
     }
     
@@ -243,41 +255,47 @@ final class Storage {
         }
     }
     
-    public func removeDefinitions(_ definitionIds: [String]) throws {
-        do {
-            if (definitionIds.isEmpty) {
-                return
+    public func removeDefinitions(_ definitionIds: [String]) {
+        performTaskInCoreData { context in
+            do {
+                if (definitionIds.isEmpty) {
+                    return
+                }
+                
+                let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Definition")
+                request.predicate = NSPredicate(
+                    format: "defId IN %@", definitionIds
+                )
+                
+                try context.execute(NSBatchDeleteRequest(fetchRequest: request))
+            } catch {
+                self.monitoring.error(EDMPError.removePartialEvents)
             }
-            
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Definition")
-            request.predicate = NSPredicate(
-                format: "defId IN %@", definitionIds
-            )
-            
-            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: request))
-        } catch {
-            throw EDMPError.removePartialEvents
         }
     }
     
-    public func removeAllDefinitions() throws {
-        do {
-            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: "Definition")))
-        } catch {
-            throw EDMPError.removeAllDefinitions
+    public func removeAllDefinitions() {
+        performTaskInCoreData { context in
+            do {
+                try context.execute(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: "Definition")))
+            } catch {
+                self.monitoring.error(EDMPError.removeAllDefinitions)
+            }
         }
     }
     
-    public func setEvents(events: [EventStruct]) throws {
-        do {
-            events.forEach { eventStruct in
-                let event = Event(context: managedContext)
-                event.setData(eventStruct: eventStruct)
+    public func setEvents(events: [EventStruct]) {
+        performTaskInCoreData { context in
+            do {
+                events.forEach { eventStruct in
+                    let event = Event(context: context)
+                    event.setData(eventStruct: eventStruct)
+                }
+                
+                try context.save()
+            } catch {
+                self.monitoring.error(EDMPError.setEventsFailed)
             }
-            
-            try managedContext.save()
-        } catch {
-            throw EDMPError.setEventsFailed
         }
     }
     
@@ -289,76 +307,74 @@ final class Storage {
         }
     }
     
-    public func removeEventsByDefinitions(_ definitionIds: [String]) throws {
-        do {
-            if (definitionIds.isEmpty) {
-                return
+    public func removeEventsByDefinitions(_ definitionIds: [String]) {
+        performTaskInCoreData { context in
+            do {
+                if (definitionIds.isEmpty) {
+                    return
+                }
+                
+                let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Event")
+                request.predicate = NSPredicate(
+                    format: "defId IN %@", definitionIds
+                )
+                
+                try context.execute(NSBatchDeleteRequest(fetchRequest: request))
+            } catch {
+                self.monitoring.error(EDMPError.removePartialEvents)
             }
-            
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Event")
-            request.predicate = NSPredicate(
-                format: "defId IN %@", definitionIds
-            )
-            
-            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: request))
-        } catch {
-            throw EDMPError.removePartialEvents
         }
     }
     
     public func removeOneTimeEvents() throws {
-        do {
-            let oneTimeDefinitionIds = self.getDefinitions()
-                .filter({ $0.type == EDefinitionType.CURRENT_PAGE })
-                .map({ return $0.defId })
-            
-            try self.removeEventsByDefinitions(oneTimeDefinitionIds)
-        } catch {
-            throw EDMPError.removeOneTimeEvents
-        }
+        let oneTimeDefinitionIds = self.getDefinitions()
+            .filter({ $0.type == EDefinitionType.CURRENT_PAGE })
+            .map({ return $0.defId })
+        
+        self.removeEventsByDefinitions(oneTimeDefinitionIds)
     }
     
-    public func removeAllEvents() throws {
-        do {
-            try managedContext.execute(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: "Event")))
-        } catch {
-            throw EDMPError.removeAllEvents
-        }
-    }
-    
-    public func mergeEvents(newEvents: [EventStruct]) throws {
-        let oldEvents = self.getEvents()
-
-        do {
-            newEvents.forEach { eventStruct in
-                if let currentOldEvent: Event = oldEvents.first(
-                    where: {$0.computedId == getEventComputedId(eventStruct: eventStruct)}
-                ) {
-                    currentOldEvent.timestamps = currentOldEvent.timestamps
-                        .addingObjects(from: eventStruct.timestamps)
-                        .sorted {a, b in (a as! Int) > (b as! Int)} as NSArray
-                    let removeCount = currentOldEvent.timestamps.count - Config.Constant.maxEventCount
-                    if (removeCount > 0) {
-                        currentOldEvent.timestamps = currentOldEvent.timestamps.dropLast(removeCount) as NSArray
-                    }
-                } else {
-                    let event = Event(context: managedContext)
-                    event.setData(eventStruct: eventStruct)
-                }
+    public func removeAllEvents() {
+        performTaskInCoreData { context in
+            do {
+                try context.execute(NSBatchDeleteRequest(fetchRequest: NSFetchRequest(entityName: "Event")))
+            } catch {
+                self.monitoring.error(EDMPError.removeAllEvents)
             }
+        }
+    }
+    
+    public func mergeEvents(newEvents: [EventStruct]) {
+        performTaskInCoreData { context in
+            let oldEvents = self.getEvents()
 
-            try managedContext.save()
-        } catch {
-            throw EDMPError.mergeEventsFailed
+            do {
+                newEvents.forEach { eventStruct in
+                    if let currentOldEvent: Event = oldEvents.first(
+                        where: {$0.computedId == getEventComputedId(eventStruct: eventStruct)}
+                    ) {
+                        currentOldEvent.timestamps = currentOldEvent.timestamps
+                            .addingObjects(from: eventStruct.timestamps)
+                            .sorted {a, b in (a as! Int) > (b as! Int)} as NSArray
+                        let removeCount = currentOldEvent.timestamps.count - Config.Constant.maxEventCount
+                        if (removeCount > 0) {
+                            currentOldEvent.timestamps = currentOldEvent.timestamps.dropLast(removeCount) as NSArray
+                        }
+                    } else {
+                        let event = Event(context: context)
+                        event.setData(eventStruct: eventStruct)
+                    }
+                }
+
+                try context.save()
+            } catch {
+                self.monitoring.error(EDMPError.mergeEventsFailed)
+            }
         }
     }
     
     public func removeStorageData() throws {
-        do {
-            try self.removeAllEvents()
-            try self.removeAllDefinitions()
-        } catch {
-            throw EDMPError.removeAllStorage
-        }
+        self.removeAllEvents()
+        self.removeAllDefinitions()
     }
 }

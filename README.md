@@ -19,6 +19,15 @@ it, simply add the following line to your Podfile:
 pod 'IdxDmpSdk'
 ```
 
+## App configuration
+
+Add new key and value to `Info.plist` file
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>It makes our adwords more compatibility with your interests</string>
+```
+
 ## Integration DataManagerProvider example
 
 ```swift

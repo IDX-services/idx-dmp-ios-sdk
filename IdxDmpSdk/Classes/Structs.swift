@@ -96,13 +96,9 @@ public struct EventRequestStruct: Encodable {
     let userId: String
     let providerId: String
     let dxf: String
+    let deviceId: String
     let properties: EventRequestPropertiesStruct
     let srcMeta: SdkMetaDataStruct
-}
-
-struct EventQueueItem {
-    let properties: EventRequestPropertiesStruct
-    let callback: (Any?) -> Void
 }
 
 struct EnterAndExitDefinitionIds {

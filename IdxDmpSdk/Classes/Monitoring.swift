@@ -82,8 +82,6 @@ final class Monitoring {
             self.printMessage("Remove all events failed", ELogLevel.Errors)
         case EDMPError.removeAllDefinitions:
             self.printMessage("Remove all definitions failed", ELogLevel.Errors)
-        case EDMPError.removeAllStorage:
-            self.printMessage("Remove all storage failed", ELogLevel.Errors)
         case EDMPError.databaseConnectFailed:
             self.printMessage("Database is not available", ELogLevel.Errors)
         case EDMPError.userIdIsEmpty:
