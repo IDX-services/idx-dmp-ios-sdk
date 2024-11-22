@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IdxDmpSdk'
-  s.version          = '2.4.6'
+  s.version          = '2.4.7'
   s.summary          = 'IDX DMP iOS SDK'
   s.swift_version    = '5.7'
 
@@ -30,7 +30,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/IDX-services/idx-dmp-ios-sdk.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '11.0'
+  s.ios.deployment_target = '12.0'
 
   s.source_files = 'IdxDmpSdk/Classes/**/*'
   

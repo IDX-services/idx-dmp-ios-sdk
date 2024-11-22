@@ -40,7 +40,7 @@ PODS:
   - "GoogleUtilities/NSData+zlib (7.11.1)"
   - GoogleUtilities/Reachability (7.11.1):
     - GoogleUtilities/Logger
-  - IdxDmpSdk (2.4.6)
+  - IdxDmpSdk (2.4.7)
   - nanopb (2.30909.0):
     - nanopb/decode (= 2.30909.0)
     - nanopb/encode (= 2.30909.0)
@@ -70,10 +70,10 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: d3dabccdb336fc0ae44b633c8abaa26559893cd9
   GoogleUserMessagingPlatform: 5f8b30daf181805317b6b985bb51c1ff3beca054
   GoogleUtilities: 9aa0ad5a7bc171f8bae016300bfcfa3fb8425749
-  IdxDmpSdk: 772bfea71d0d87c6a705c7cac97953b92e34f50a
+  IdxDmpSdk: 9c84c73841971be366f6e2e8e81d24d01684fc40
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
 
-PODFILE CHECKSUM: 0e762a9411fc97a60b8d88eb5cbcc24aba1cfa8d
+PODFILE CHECKSUM: 5cd6703bff2c9677adb8f82d378b62644e7208c3
 
 COCOAPODS: 1.15.2

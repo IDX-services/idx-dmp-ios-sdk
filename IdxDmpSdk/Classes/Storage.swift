@@ -170,7 +170,6 @@ class Event: NSManagedObject {
 
 }
 
-@available(iOS 12.0, *)
 extension StorageTransformer {
     static let name = NSValueTransformerName(rawValue: String(describing: StorageTransformer.self))
     
@@ -180,7 +179,6 @@ extension StorageTransformer {
     }
 }
 
-@available(iOS 12.0, *)
 @objc(StorageTransformer)
 class StorageTransformer: NSSecureUnarchiveFromDataTransformer {
     override static var allowedTopLevelClasses: [AnyClass] {
@@ -197,11 +195,7 @@ final class Storage {
         do {
             self.monitoring = monitoring
 
-            if #available(iOS 12.0, *) {
-                StorageTransformer.register()
-            } else {
-                throw EDMPError.databaseConnectFailed
-            }
+            StorageTransformer.register()
             
             let modelURL = Bundle(for: Storage.self).url(forResource: "IdxDmpSdkStorage", withExtension: "momd")
             var container: NSPersistentContainer
