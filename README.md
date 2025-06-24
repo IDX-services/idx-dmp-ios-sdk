@@ -2,6 +2,12 @@
 
 This guide provides detailed instructions for integrating and using the IDX Data Manager Provider SDK in your iOS applications.
 
+This SDK is designed to automatically add user audiences (targeting parameters) to ad requests. There are two approaches for audience calculation - native and via WebView connector.
+
+1. The native approach is suitable when you display your content directly in the mobile application and know the required targeting parameters such as title, description, author, and others.
+
+2. The WebView connector helps when you display your content inside a `WebView` and your content resides on a web page. In this case, the content data will be automatically processed by the Web SDK (which must be installed on the page you want to display in the WebView) and passed to the `DMPWebViewConnector`. This way, you can use this data on the native side of your application.
+
 [![Version](https://img.shields.io/cocoapods/v/IdxDmpSdk.svg?style=flat)](https://cocoapods.org/pods/IdxDmpSdk)
 [![License](https://img.shields.io/cocoapods/l/IdxDmpSdk.svg?style=flat)](https://cocoapods.org/pods/IdxDmpSdk)
 [![Platform](https://img.shields.io/cocoapods/p/IdxDmpSdk.svg?style=flat)](https://cocoapods.org/pods/IdxDmpSdk)
