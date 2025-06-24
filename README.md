@@ -119,27 +119,38 @@ If your app uses `WebView` to display content but you want to request ads native
 
 The connector automatically listens to events from the web page and provides access to audiences calculated by the web SDK. Subsequent integration is identical to DataManagerProvider.
 
+If you have multiple webviews, you need to create a separate DMPWebViewConnector for each of them. DMPWebViewConnector is just a small bridge, so it has practically no overhead.
+
 ```swift
 class ViewController: UIViewController {
-    var dmpWebViewConnector: DMPWebViewConnector?
+    var dmpWebViewConnector1: DMPWebViewConnector?
+    var dmpWebViewConnector2: DMPWebViewConnector?
     
     ...
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // You have to set your WKWebView instance
-        connector = DMPWebViewConnector(yourWebView.configuration.userContentController, "My app name", "1.0.0")
+        dmpWebViewConnector1 = DMPWebViewConnector(yourWebView.configuration.userContentController, "My app name", "1.0.0")
+        dmpWebViewConnector2 = DMPWebViewConnector(yourWebView.configuration.userContentController, "My app name", "1.0.0")
     }
 
     ...
     
     @IBAction func handleShowAd() {
-        guard let connector = self.connector else {
+        guard let connector1 = self.dmpWebViewConnector1 else {
             return
         }
 
         let adRequest: GAMRequest = GAMRequest()
-        adRequest.customTargeting = connector.getCustomAdTargeting()
+        adRequest.customTargeting = connector1.getCustomAdTargeting()
+
+        guard let connector2 = self.dmpWebViewConnector2 else {
+            return
+        }
+
+        let adRequest: GAMRequest = GAMRequest()
+        adRequest.customTargeting = connector2.getCustomAdTargeting()
     }
 
     ...
