@@ -131,8 +131,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // You have to set your WKWebView instance
-        dmpWebViewConnector1 = DMPWebViewConnector(yourWebView.configuration.userContentController, "My app name", "1.0.0")
-        dmpWebViewConnector2 = DMPWebViewConnector(yourWebView.configuration.userContentController, "My app name", "1.0.0")
+        dmpWebViewConnector1 = DMPWebViewConnector(yourWebView1.configuration.userContentController, "My app name", "1.0.0")
+        dmpWebViewConnector2 = DMPWebViewConnector(yourWebView2.configuration.userContentController, "My app name", "1.0.0")
     }
 
     ...
